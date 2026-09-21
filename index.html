@@ -1,0 +1,3087 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>AI IDOL — FUTURE SKY</title>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background:
+        #EFFFFF;
+
+}
+
+body {
+
+    font-family:
+        "Noto Sans KR",
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+}
+
+
+/* =========================================================
+   THREE CANVAS
+========================================================= */
+
+#scene {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+}
+
+
+/* =========================================================
+   BRIGHT DAYLIGHT ATMOSPHERE
+========================================================= */
+
+.color-layer {
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 10;
+
+    background:
+
+        /* 중앙의 강한 백색 하늘빛 */
+
+        radial-gradient(
+            ellipse at 50% 18%,
+            rgba(255,255,255,.60),
+            rgba(255,255,255,.18) 35%,
+            transparent 68%
+        ),
+
+        /* 네온 핑크 */
+
+        radial-gradient(
+            ellipse at 8% 55%,
+            rgba(255,110,207,.18),
+            transparent 42%
+        ),
+
+        /* 시안 */
+
+        radial-gradient(
+            ellipse at 90% 35%,
+            rgba(87,242,255,.20),
+            transparent 44%
+        ),
+
+        /* 바이올렛 */
+
+        radial-gradient(
+            ellipse at 75% 90%,
+            rgba(167,139,250,.13),
+            transparent 45%
+        );
+
+    mix-blend-mode: screen;
+
+}
+
+
+/* =========================================================
+   SOFT SKY LIGHT
+========================================================= */
+
+.sky-light {
+
+    position: absolute;
+
+    left: 50%;
+    top: 35%;
+
+    transform:
+        translate(-50%, -50%);
+
+    width: 75vw;
+    height: 65vh;
+
+    border-radius: 50%;
+
+    background:
+
+        radial-gradient(
+            ellipse,
+            rgba(255,255,255,.45),
+            rgba(190,250,255,.12) 35%,
+            transparent 72%
+        );
+
+    filter:
+        blur(70px);
+
+}
+
+
+/* =========================================================
+   VIGNETTE
+   매우 약하게만 사용
+========================================================= */
+
+.vignette {
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 11;
+
+    background:
+
+        radial-gradient(
+            ellipse at center,
+            transparent 45%,
+            rgba(100,130,210,.045) 100%
+        );
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<canvas id="scene"></canvas>
+
+
+<div class="sky-light"></div>
+
+
+<div class="color-layer"></div>
+
+
+<div class="vignette"></div>
+
+
+<script type="module">
+
+
+/* =========================================================
+   THREE
+========================================================= */
+
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
+
+
+/* =========================================================
+   RENDERER
+========================================================= */
+
+const canvas =
+    document.getElementById(
+        "scene"
+    );
+
+
+const renderer =
+    new THREE.WebGLRenderer({
+
+        canvas,
+
+        antialias: true,
+
+        alpha: true
+
+    });
+
+
+renderer.setPixelRatio(
+
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
+
+);
+
+
+renderer.setSize(
+
+    window.innerWidth,
+    window.innerHeight
+
+);
+
+
+renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+
+renderer.toneMapping =
+    THREE.ACESFilmicToneMapping;
+
+
+/*
+    한낮처럼 밝게
+*/
+
+renderer.toneMappingExposure =
+    1.55;
+
+
+/* =========================================================
+   SCENE
+========================================================= */
+
+const scene =
+    new THREE.Scene();
+
+
+/*
+    거의 흰색에 가까운
+    밝은 하늘
+*/
+
+scene.background =
+    new THREE.Color(
+        "#EAFBFF"
+    );
+
+
+/*
+    아주 약한 시안색 안개
+
+    기존보다 훨씬 옅게
+*/
+
+scene.fog =
+    new THREE.FogExp2(
+
+        new THREE.Color(
+            "#E4FAFF"
+        ),
+
+        0.0042
+
+    );
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+const camera =
+    new THREE.PerspectiveCamera(
+
+        52,
+
+        window.innerWidth /
+        window.innerHeight,
+
+        0.1,
+
+        1000
+
+    );
+
+
+camera.position.set(
+
+    0,
+    7,
+    24
+
+);
+
+
+/* =========================================================
+   LIGHTING
+========================================================= */
+
+
+/*
+    하늘에서 내려오는 백색광
+*/
+
+const hemi =
+    new THREE.HemisphereLight(
+
+        0xFFFFFF,
+
+        0x75BFFF,
+
+        5.5
+
+    );
+
+
+scene.add(
+    hemi
+);
+
+
+/*
+    태양처럼 느껴지는
+    강한 백색광
+
+    실제 태양은 보이지 않음
+*/
+
+const sun =
+    new THREE.DirectionalLight(
+
+        0xFFFFFF,
+
+        4.0
+
+    );
+
+
+sun.position.set(
+
+    -25,
+    50,
+    20
+
+);
+
+
+scene.add(
+    sun
+);
+
+
+/*
+    네온 핑크 공간광
+*/
+
+const pinkLight =
+    new THREE.PointLight(
+
+        0xFF5FCB,
+
+        20,
+
+        85
+
+    );
+
+
+pinkLight.position.set(
+
+    -32,
+    13,
+    -20
+
+);
+
+
+scene.add(
+    pinkLight
+);
+
+
+/*
+    시안 공간광
+*/
+
+const cyanLight =
+    new THREE.PointLight(
+
+        0x45F4FF,
+
+        20,
+
+        90
+
+    );
+
+
+cyanLight.position.set(
+
+    34,
+    19,
+    -32
+
+);
+
+
+scene.add(
+    cyanLight
+);
+
+
+/*
+    바이올렛
+*/
+
+const violetLight =
+    new THREE.PointLight(
+
+        0xA78BFA,
+
+        13,
+
+        80
+
+    );
+
+
+violetLight.position.set(
+
+    5,
+    9,
+    -42
+
+);
+
+
+scene.add(
+    violetLight
+);
+
+
+/* =========================================================
+   RADIAL TEXTURE
+========================================================= */
+
+function radialTexture(
+
+    color = "255,255,255"
+
+) {
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    canvas.width = 256;
+    canvas.height = 256;
+
+
+    const ctx =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    const gradient =
+        ctx.createRadialGradient(
+
+            128,
+            128,
+            0,
+
+            128,
+            128,
+            128
+
+        );
+
+
+    gradient.addColorStop(
+
+        0,
+
+        `rgba(${color},1)`
+
+    );
+
+
+    gradient.addColorStop(
+
+        .25,
+
+        `rgba(${color},.45)`
+
+    );
+
+
+    gradient.addColorStop(
+
+        .6,
+
+        `rgba(${color},.10)`
+
+    );
+
+
+    gradient.addColorStop(
+
+        1,
+
+        `rgba(${color},0)`
+
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+
+        0,
+        0,
+        256,
+        256
+
+    );
+
+
+    return new THREE.CanvasTexture(
+        canvas
+    );
+
+}
+
+
+const whiteGlow =
+    radialTexture(
+        "255,255,255"
+    );
+
+
+const cyanGlow =
+    radialTexture(
+        "80,245,255"
+    );
+
+
+const pinkGlow =
+    radialTexture(
+        "255,90,205"
+    );
+
+
+/* =========================================================
+   FLOATING FOG
+========================================================= */
+
+const fogObjects = [];
+
+
+for (
+
+    let i = 0;
+
+    i < 65;
+
+    i++
+
+) {
+
+    let color;
+
+
+    const r =
+        Math.random();
+
+
+    if (r < .32) {
+
+        color =
+            0xFFFFFF;
+
+    }
+
+    else if (r < .58) {
+
+        color =
+            0x8CFAFF;
+
+    }
+
+    else if (r < .82) {
+
+        color =
+            0xFFB6E9;
+
+    }
+
+    else {
+
+        color =
+            0xBFA8FF;
+
+    }
+
+
+    const material =
+        new THREE.SpriteMaterial({
+
+            map:
+                whiteGlow,
+
+            color,
+
+            transparent: true,
+
+            opacity:
+
+                .025 +
+                Math.random() * .065,
+
+            depthWrite: false,
+
+            blending:
+                THREE.AdditiveBlending
+
+        });
+
+
+    const fog =
+        new THREE.Sprite(
+            material
+        );
+
+
+    const x =
+        (
+            Math.random() - .5
+        ) * 140;
+
+
+    const y =
+        1 +
+        Math.random() * 34;
+
+
+    const z =
+        -8 -
+        Math.random() * 110;
+
+
+    fog.position.set(
+
+        x,
+        y,
+        z
+
+    );
+
+
+    const scale =
+        5 +
+        Math.random() * 20;
+
+
+    fog.scale.set(
+
+        scale * 2.7,
+        scale,
+        1
+
+    );
+
+
+    scene.add(
+        fog
+    );
+
+
+    fogObjects.push({
+
+        mesh: fog,
+
+        x,
+        y,
+        z,
+
+        phase:
+            Math.random() *
+            Math.PI *
+            2,
+
+        speed:
+            .035 +
+            Math.random() * .12,
+
+        amplitude:
+            .5 +
+            Math.random() * 2.4
+
+    });
+
+}
+
+
+/* =========================================================
+   CIRCULAR GLASS PLATFORM
+========================================================= */
+
+const floorGeometry =
+    new THREE.CircleGeometry(
+
+        78,
+        192
+
+    );
+
+
+const floorMaterial =
+    new THREE.MeshPhysicalMaterial({
+
+        /*
+            거의 흰색에 가까운
+            투명 유리
+        */
+
+        color:
+            0xEFFFFF,
+
+        transparent: true,
+
+        opacity: .14,
+
+        roughness: .018,
+
+        metalness: .10,
+
+        transmission: .78,
+
+        thickness: .08,
+
+        ior: 1.42,
+
+        side:
+            THREE.DoubleSide
+
+    });
+
+
+const floor =
+    new THREE.Mesh(
+
+        floorGeometry,
+
+        floorMaterial
+
+    );
+
+
+floor.rotation.x =
+    -Math.PI / 2;
+
+
+floor.position.y =
+    -1;
+
+
+scene.add(
+    floor
+);
+
+
+/* =========================================================
+   FLOOR ENERGY SHADER
+========================================================= */
+
+
+/*
+    단순한 grid가 아니라
+
+    "디지털 에너지장"
+
+    을 표현한다.
+*/
+
+const energyMaterial =
+    new THREE.ShaderMaterial({
+
+        transparent: true,
+
+        depthWrite: false,
+
+        blending:
+            THREE.AdditiveBlending,
+
+        uniforms: {
+
+            time: {
+                value: 0
+            }
+
+        },
+
+        vertexShader: `
+
+            varying vec2 vUv;
+
+            void main(){
+
+                vUv = uv;
+
+                gl_Position =
+                    projectionMatrix *
+                    modelViewMatrix *
+                    vec4(
+                        position,
+                        1.0
+                    );
+
+            }
+
+        `,
+
+        fragmentShader: `
+
+            uniform float time;
+
+            varying vec2 vUv;
+
+
+            void main(){
+
+                vec2 uv =
+                    vUv - .5;
+
+
+                float dist =
+                    length(uv);
+
+
+                /*
+                    동심원
+                */
+
+                float rings =
+                    sin(
+
+                        dist * 115.0
+                        -
+                        time * 1.7
+
+                    );
+
+
+                rings =
+                    smoothstep(
+
+                        .90,
+                        1.0,
+
+                        rings
+
+                    );
+
+
+                /*
+                    두 번째 느린 파동
+                */
+
+                float rings2 =
+                    sin(
+
+                        dist * 48.0
+                        +
+                        time * .7
+
+                    );
+
+
+                rings2 =
+                    smoothstep(
+
+                        .92,
+                        1.0,
+
+                        rings2
+
+                    );
+
+
+                /*
+                    방사형 데이터
+                */
+
+                float angle =
+                    atan(
+                        uv.y,
+                        uv.x
+                    );
+
+
+                float radial =
+                    sin(
+
+                        angle * 24.0
+                        +
+                        dist * 60.0
+                        -
+                        time * 1.4
+
+                    );
+
+
+                radial =
+                    smoothstep(
+
+                        .88,
+                        1.0,
+
+                        radial
+
+                    );
+
+
+                /*
+                    중심부가
+                    더 밝게
+                */
+
+                float center =
+                    1.0 -
+                    smoothstep(
+
+                        .0,
+                        .55,
+                        dist
+
+                    );
+
+
+                /*
+                    edge fade
+                */
+
+                float edge =
+                    1.0 -
+                    smoothstep(
+
+                        .36,
+                        .50,
+                        dist
+
+                    );
+
+
+                /*
+                    네온 블루
+                */
+
+                vec3 blue =
+                    vec3(
+
+                        .15,
+                        .78,
+                        1.0
+
+                    );
+
+
+                /*
+                    네온 핑크
+                */
+
+                vec3 pink =
+                    vec3(
+
+                        1.0,
+                        .18,
+                        .68
+
+                    );
+
+
+                /*
+                    블루 + 핑크
+                */
+
+                vec3 color =
+                    mix(
+
+                        blue,
+                        pink,
+
+                        smoothstep(
+                            -.25,
+                            .7,
+                            sin(
+                                angle * 2.0
+                                +
+                                time * .25
+                            )
+                        )
+
+                    );
+
+
+                float intensity =
+
+                    rings * .50
+
+                    +
+
+                    rings2 * .28
+
+                    +
+
+                    radial * .18
+
+                    +
+
+                    center * .10;
+
+
+                gl_FragColor =
+                    vec4(
+
+                        color,
+
+                        intensity *
+                        edge *
+                        .52
+
+                    );
+
+            }
+
+        `
+
+    });
+
+
+const energyFloor =
+    new THREE.Mesh(
+
+        new THREE.CircleGeometry(
+            78,
+            192
+        ),
+
+        energyMaterial
+
+    );
+
+
+energyFloor.rotation.x =
+    -Math.PI / 2;
+
+
+energyFloor.position.y =
+    -.90;
+
+
+scene.add(
+    energyFloor
+);
+
+
+/* =========================================================
+   FUTURE FLOOR RINGS
+========================================================= */
+
+const floorRings = [];
+
+
+function createFloorRing(
+
+    radius,
+    color,
+    opacity
+
+) {
+
+    const geometry =
+        new THREE.RingGeometry(
+
+            radius,
+            radius + .045,
+
+            160
+
+        );
+
+
+    const material =
+        new THREE.MeshBasicMaterial({
+
+            color,
+
+            transparent: true,
+
+            opacity,
+
+            blending:
+                THREE.AdditiveBlending,
+
+            depthWrite: false,
+
+            side:
+                THREE.DoubleSide
+
+        });
+
+
+    const ring =
+        new THREE.Mesh(
+
+            geometry,
+
+            material
+
+        );
+
+
+    ring.rotation.x =
+        -Math.PI / 2;
+
+
+    ring.position.y =
+        -.72;
+
+
+    scene.add(
+        ring
+    );
+
+
+    floorRings.push({
+
+        mesh: ring,
+
+        baseRadius: radius,
+
+        phase:
+            Math.random() *
+            Math.PI *
+            2,
+
+        speed:
+            .12 +
+            Math.random() * .20
+
+    });
+
+}
+
+
+createFloorRing(
+
+    9,
+    0xFFFFFF,
+    .55
+
+);
+
+
+createFloorRing(
+
+    17,
+    0x45F4FF,
+    .45
+
+);
+
+
+createFloorRing(
+
+    27,
+    0xFF5FCB,
+    .40
+
+);
+
+
+createFloorRing(
+
+    39,
+    0x8C7CFF,
+    .30
+
+);
+
+
+createFloorRing(
+
+    52,
+    0x45F4FF,
+    .22
+
+);
+
+
+createFloorRing(
+
+    67,
+    0xFF5FCB,
+    .15
+
+);
+
+
+/* =========================================================
+   FLOOR LIGHT COLUMNS
+========================================================= */
+
+const floorBeams = [];
+
+
+function createFloorBeam(
+
+    x,
+    z,
+    color,
+    size
+
+) {
+
+    const material =
+        new THREE.SpriteMaterial({
+
+            map:
+                color === 0xFF5FCB
+                    ? pinkGlow
+                    : cyanGlow,
+
+            color,
+
+            transparent: true,
+
+            opacity: .15,
+
+            depthWrite: false,
+
+            blending:
+                THREE.AdditiveBlending
+
+        });
+
+
+    const sprite =
+        new THREE.Sprite(
+            material
+        );
+
+
+    sprite.position.set(
+
+        x,
+        -.15,
+        z
+
+    );
+
+
+    sprite.scale.set(
+
+        size,
+        size * 3.5,
+        1
+
+    );
+
+
+    scene.add(
+        sprite
+    );
+
+
+    floorBeams.push({
+
+        mesh: sprite,
+
+        phase:
+            Math.random() *
+            Math.PI *
+            2
+
+    });
+
+}
+
+
+/*
+    바닥에서 솟는
+    비현실적인 빛
+*/
+
+createFloorBeam(
+    -18,
+    -10,
+    0xFF5FCB,
+    9
+);
+
+
+createFloorBeam(
+    14,
+    -18,
+    0x45F4FF,
+    11
+);
+
+
+createFloorBeam(
+    -3,
+    -28,
+    0xA78BFA,
+    8
+);
+
+
+createFloorBeam(
+    28,
+    2,
+    0xFF5FCB,
+    7
+);
+
+
+createFloorBeam(
+    -32,
+    14,
+    0x45F4FF,
+    8
+);
+
+
+/* =========================================================
+   FLOATING PLATFORM
+========================================================= */
+
+const platforms = [];
+
+
+function createPlatform(
+
+    x,
+    y,
+    z,
+
+    width,
+    depth,
+
+    color,
+    opacity
+
+) {
+
+    const geometry =
+        new THREE.BoxGeometry(
+
+            width,
+            .22,
+            depth
+
+        );
+
+
+    const material =
+        new THREE.MeshPhysicalMaterial({
+
+            color,
+
+            transparent: true,
+
+            opacity,
+
+            roughness: .025,
+
+            metalness: .08,
+
+            transmission: .70,
+
+            thickness: .12
+
+        });
+
+
+    const mesh =
+        new THREE.Mesh(
+
+            geometry,
+            material
+
+        );
+
+
+    mesh.position.set(
+
+        x,
+        y,
+        z
+
+    );
+
+
+    scene.add(
+        mesh
+    );
+
+
+    platforms.push({
+
+        mesh,
+
+        x,
+        y,
+        z,
+
+        phase:
+            Math.random() *
+            Math.PI *
+            2
+
+    });
+
+}
+
+
+/* =========================================================
+   PLATFORMS
+========================================================= */
+
+createPlatform(
+
+    -13,
+    -.3,
+    5,
+
+    23,
+    9,
+
+    0xDDFBFF,
+
+    .22
+
+);
+
+
+createPlatform(
+
+    16,
+    -.15,
+    1,
+
+    27,
+    10,
+
+    0xFFD9F1,
+
+    .20
+
+);
+
+
+createPlatform(
+
+    -18,
+    1.8,
+    -17,
+
+    20,
+    9,
+
+    0xCFFBFF,
+
+    .17
+
+);
+
+
+createPlatform(
+
+    17,
+    3,
+    -24,
+
+    23,
+    11,
+
+    0xFFD4EF,
+
+    .16
+
+);
+
+
+createPlatform(
+
+    -7,
+    4,
+    -32,
+
+    17,
+    8,
+
+    0xDDD6FF,
+
+    .15
+
+);
+
+
+/* =========================================================
+   AI CITY
+========================================================= */
+
+const city =
+    new THREE.Group();
+
+
+scene.add(
+    city
+);
+
+
+function createTower(
+
+    x,
+    y,
+    z,
+
+    width,
+    height,
+    depth,
+
+    color,
+    opacity
+
+) {
+
+    const geometry =
+        new THREE.BoxGeometry(
+
+            width,
+            height,
+            depth
+
+        );
+
+
+    const material =
+        new THREE.MeshPhysicalMaterial({
+
+            color,
+
+            transparent: true,
+
+            opacity,
+
+            roughness: .025,
+
+            metalness: .08,
+
+            transmission: .55,
+
+            thickness: .15
+
+        });
+
+
+    const tower =
+        new THREE.Mesh(
+
+            geometry,
+            material
+
+        );
+
+
+    tower.position.set(
+
+        x,
+        y + height / 2,
+        z
+
+    );
+
+
+    city.add(
+        tower
+    );
+
+
+    return tower;
+
+}
+
+
+/* =========================================================
+   TOWERS
+========================================================= */
+
+const towerData = [
+
+    [-10,0,-58,3,18,3],
+
+    [-6,0,-61,4,27,4],
+
+    [-1,0,-64,5,34,5],
+
+    [5,0,-61,3,25,3],
+
+    [9,0,-59,5,20,5],
+
+    [-14,0,-67,3,15,3],
+
+    [14,0,-68,4,17,4],
+
+    [-20,0,-73,5,12,5],
+
+    [20,0,-74,5,13,5]
+
+];
+
+
+towerData.forEach(
+
+    (data, index) => {
+
+        let color;
+
+        if (
+            index % 3 === 0
+        ) {
+
+            color =
+                0xD7FBFF;
+
+        }
+
+        else if (
+            index % 3 === 1
+        ) {
+
+            color =
+                0xFFD7F0;
+
+        }
+
+        else {
+
+            color =
+                0xDCD6FF;
+
+        }
+
+
+        createTower(
+
+            ...data,
+
+            color,
+
+            .13
+
+        );
+
+    }
+
+);
+
+
+/* =========================================================
+   CENTRAL LIGHT BEAM
+========================================================= */
+
+const beamMaterial =
+    new THREE.ShaderMaterial({
+
+        transparent: true,
+
+        depthWrite: false,
+
+        blending:
+            THREE.AdditiveBlending,
+
+        uniforms: {
+
+            time: {
+                value: 0
+            }
+
+        },
+
+        vertexShader: `
+
+            varying vec3 vPosition;
+
+            void main(){
+
+                vPosition =
+                    position;
+
+                gl_Position =
+                    projectionMatrix *
+                    modelViewMatrix *
+                    vec4(
+                        position,
+                        1.0
+                    );
+
+            }
+
+        `,
+
+        fragmentShader: `
+
+            uniform float time;
+
+            varying vec3 vPosition;
+
+
+            void main(){
+
+                float edge =
+                    abs(
+                        vPosition.x
+                    );
+
+
+                float glow =
+                    1.0 -
+                    smoothstep(
+
+                        .0,
+                        2.8,
+                        edge
+
+                    );
+
+
+                float pulse =
+                    .75 +
+
+                    sin(
+                        time * 1.1
+                    ) * .15;
+
+
+                vec3 blue =
+                    vec3(
+                        .25,
+                        .9,
+                        1.0
+                    );
+
+
+                vec3 pink =
+                    vec3(
+                        1.0,
+                        .25,
+                        .75
+                    );
+
+
+                vec3 color =
+                    mix(
+
+                        blue,
+                        pink,
+
+                        (
+                            sin(
+                                time * .2
+                            ) + 1.0
+                        ) * .5
+
+                    );
+
+
+                gl_FragColor =
+                    vec4(
+
+                        color,
+
+                        glow *
+                        .12 *
+                        pulse
+
+                    );
+
+            }
+
+        `
+
+    });
+
+
+const beam =
+    new THREE.Mesh(
+
+        new THREE.BoxGeometry(
+
+            3,
+            65,
+            3
+
+        ),
+
+        beamMaterial
+
+    );
+
+
+beam.position.set(
+
+    0,
+    20,
+    -64
+
+);
+
+
+scene.add(
+    beam
+);
+
+
+/* =========================================================
+   HOLOGRAPHIC CODE
+========================================================= */
+
+const codeTextures =
+    new Map();
+
+
+const codeTextList = [
+
+    "AI_IDOL_07",
+
+    "EMOTION = 0.82",
+
+    "VOICE_GENERATE()",
+
+    "MEMORY_SYNC",
+
+    "PRODUCER.CONNECT",
+
+    "DREAM_SEQUENCE",
+
+    "VIRTUAL_LIVE",
+
+    "STAGE_INITIALIZE",
+
+    "PERSONALITY.DATA",
+
+    "MUSIC_STREAM",
+
+    "AI_CORE",
+
+    "0101010101100101",
+
+    "001011010010101",
+
+    "SYSTEM_ONLINE",
+
+    "FUTURE_WORLD",
+
+    "emotion.sync()",
+
+    "memory.fragment",
+
+    "HELLO_PRODUCER",
+
+    "IDOL_MEMORY"
+
+];
+
+
+function createCodeTexture(
+    text
+) {
+
+    if (
+        codeTextures.has(text)
+    )
+        return codeTextures.get(text);
+
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    canvas.width = 1200;
+    canvas.height = 260;
+
+
+    const ctx =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    ctx.clearRect(
+
+        0,
+        0,
+        canvas.width,
+        canvas.height
+
+    );
+
+
+    ctx.font =
+        "300 46px monospace";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    const random =
+        Math.random();
+
+
+    let glowColor;
+    let textColor;
+
+
+    if (
+        random < .42
+    ) {
+
+        glowColor =
+            "rgba(69,244,255,.95)";
+
+        textColor =
+            "rgba(235,255,255,.92)";
+
+    }
+
+    else if (
+        random < .78
+    ) {
+
+        glowColor =
+            "rgba(255,95,203,.95)";
+
+        textColor =
+            "rgba(255,235,250,.92)";
+
+    }
+
+    else {
+
+        glowColor =
+            "rgba(167,139,250,.95)";
+
+        textColor =
+            "rgba(245,240,255,.92)";
+
+    }
+
+
+    ctx.shadowBlur =
+        25;
+
+
+    ctx.shadowColor =
+        glowColor;
+
+
+    ctx.fillStyle =
+        textColor;
+
+
+    ctx.fillText(
+
+        text,
+
+        600,
+        130
+
+    );
+
+
+    const texture =
+        new THREE.CanvasTexture(
+            canvas
+        );
+
+
+    texture.colorSpace =
+        THREE.SRGBColorSpace;
+
+
+    codeTextures.set(
+
+        text,
+        texture
+
+    );
+
+
+    return texture;
+
+}
+
+
+const holographicCodes = [];
+
+
+for (
+
+    let i = 0;
+
+    i < 85;
+
+    i++
+
+) {
+
+    const text =
+        codeTextList[
+
+            Math.floor(
+
+                Math.random() *
+                codeTextList.length
+
+            )
+
+        ];
+
+
+    const material =
+        new THREE.SpriteMaterial({
+
+            map:
+                createCodeTexture(
+                    text
+                ),
+
+            transparent: true,
+
+            opacity:
+
+                .12 +
+                Math.random() * .27,
+
+            depthWrite: false,
+
+            blending:
+                THREE.AdditiveBlending
+
+        });
+
+
+    const sprite =
+        new THREE.Sprite(
+            material
+        );
+
+
+    const x =
+        (
+            Math.random() - .5
+        ) * 115;
+
+
+    const y =
+        4 +
+        Math.random() * 31;
+
+
+    const z =
+        -8 -
+        Math.random() * 88;
+
+
+    sprite.position.set(
+
+        x,
+        y,
+        z
+
+    );
+
+
+    const scale =
+        .55 +
+        Math.random() * 1.35;
+
+
+    sprite.scale.set(
+
+        6.5 * scale,
+        1.4 * scale,
+        1
+
+    );
+
+
+    sprite.rotation.z =
+
+        (
+            Math.random() - .5
+        ) * .25;
+
+
+    scene.add(
+        sprite
+    );
+
+
+    holographicCodes.push({
+
+        mesh: sprite,
+
+        x,
+        y,
+        z,
+
+        phase:
+            Math.random() *
+            Math.PI *
+            2,
+
+        speed:
+            .04 +
+            Math.random() * .15,
+
+        amplitude:
+            .5 +
+            Math.random() * 1.6
+
+    });
+
+}
+
+
+/* =========================================================
+   HOLOGRAPHIC PANELS
+========================================================= */
+
+const panels = [];
+
+
+function createPanel(
+
+    x,
+    y,
+    z,
+
+    width,
+    height,
+
+    rotationY,
+
+    color
+
+) {
+
+    const group =
+        new THREE.Group();
+
+
+    group.position.set(
+
+        x,
+        y,
+        z
+
+    );
+
+
+    group.rotation.y =
+        rotationY;
+
+
+    const geometry =
+        new THREE.PlaneGeometry(
+
+            width,
+            height
+
+        );
+
+
+    const material =
+        new THREE.MeshBasicMaterial({
+
+            color,
+
+            transparent: true,
+
+            opacity: .055,
+
+            side:
+                THREE.DoubleSide,
+
+            blending:
+                THREE.AdditiveBlending
+
+        });
+
+
+    const panel =
+        new THREE.Mesh(
+
+            geometry,
+            material
+
+        );
+
+
+    group.add(
+        panel
+    );
+
+
+    const glow =
+        new THREE.Sprite(
+
+            new THREE.SpriteMaterial({
+
+                map:
+                    color === 0xFF5FCB
+                        ? pinkGlow
+                        : cyanGlow,
+
+                color,
+
+                transparent: true,
+
+                opacity: .17,
+
+                depthWrite: false,
+
+                blending:
+                    THREE.AdditiveBlending
+
+            })
+
+        );
+
+
+    glow.scale.set(
+
+        width * .9,
+        height * .8,
+        1
+
+    );
+
+
+    group.add(
+        glow
+    );
+
+
+    scene.add(
+        group
+    );
+
+
+    panels.push({
+
+        group,
+
+        phase:
+            Math.random() *
+            Math.PI *
+            2
+
+    });
+
+}
+
+
+createPanel(
+
+    -27,
+    11,
+    -27,
+
+    13,
+    7,
+
+    .18,
+
+    0x45F4FF
+
+);
+
+
+createPanel(
+
+    28,
+    14,
+    -34,
+
+    15,
+    8,
+
+    -.20,
+
+    0xFF5FCB
+
+);
+
+
+createPanel(
+
+    -35,
+    18,
+    -50,
+
+    17,
+    9,
+
+    .25,
+
+    0xA78BFA
+
+);
+
+
+createPanel(
+
+    34,
+    20,
+    -55,
+
+    16,
+    9,
+
+    -.28,
+
+    0x45F4FF
+
+);
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+const particleCount =
+    1800;
+
+
+const particleGeometry =
+    new THREE.BufferGeometry();
+
+
+const particlePositions =
+    new Float32Array(
+
+        particleCount * 3
+
+    );
+
+
+const particleSpeeds = [];
+
+
+for (
+
+    let i = 0;
+
+    i < particleCount;
+
+    i++
+
+) {
+
+    const i3 =
+        i * 3;
+
+
+    particlePositions[i3] =
+
+        (
+            Math.random() - .5
+        ) * 140;
+
+
+    particlePositions[i3 + 1] =
+
+        Math.random() * 46;
+
+
+    particlePositions[i3 + 2] =
+
+        -Math.random() * 115;
+
+
+    particleSpeeds.push(
+
+        .002 +
+        Math.random() * .018
+
+    );
+
+}
+
+
+particleGeometry.setAttribute(
+
+    "position",
+
+    new THREE.BufferAttribute(
+
+        particlePositions,
+
+        3
+
+    )
+
+);
+
+
+const particleMaterial =
+    new THREE.PointsMaterial({
+
+        color:
+            0xFFFFFF,
+
+        size:
+            .05,
+
+        transparent: true,
+
+        opacity: .62,
+
+        depthWrite: false,
+
+        blending:
+            THREE.AdditiveBlending
+
+    });
+
+
+const particles =
+    new THREE.Points(
+
+        particleGeometry,
+
+        particleMaterial
+
+    );
+
+
+scene.add(
+    particles
+);
+
+
+/* =========================================================
+   MOUSE PARALLAX
+========================================================= */
+
+let mouseX = 0;
+let mouseY = 0;
+
+let targetX = 0;
+let targetY = 0;
+
+
+window.addEventListener(
+
+    "pointermove",
+
+    event => {
+
+        targetX =
+
+            event.clientX /
+            window.innerWidth -
+            .5;
+
+
+        targetY =
+
+            event.clientY /
+            window.innerHeight -
+            .5;
+
+    }
+
+);
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+const clock =
+    new THREE.Clock();
+
+
+function animate() {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    const time =
+        clock.getElapsedTime();
+
+
+    /* =====================================================
+       CAMERA
+    ===================================================== */
+
+    mouseX += (
+
+        targetX -
+        mouseX
+
+    ) * .018;
+
+
+    mouseY += (
+
+        targetY -
+        mouseY
+
+    ) * .018;
+
+
+    camera.position.x =
+
+        mouseX * 4.2 +
+
+        Math.sin(
+            time * .035
+        ) * .5;
+
+
+    camera.position.y =
+
+        7 -
+
+        mouseY * 1.7 +
+
+        Math.sin(
+            time * .045
+        ) * .35;
+
+
+    camera.position.z =
+
+        24 +
+
+        Math.sin(
+            time * .025
+        ) * .8;
+
+
+    camera.lookAt(
+
+        mouseX * 3,
+
+        5 -
+        mouseY * .7,
+
+        -30
+
+    );
+
+
+    /* =====================================================
+       FLOOR ENERGY
+    ===================================================== */
+
+    energyMaterial
+        .uniforms
+        .time
+        .value =
+        time;
+
+
+    /* =====================================================
+       FLOOR RINGS
+    ===================================================== */
+
+    floorRings.forEach(
+
+        ring => {
+
+            const t =
+                time *
+                ring.speed +
+                ring.phase;
+
+
+            const wave =
+
+                (
+                    Math.sin(t) + 1
+                ) * .5;
+
+
+            ring.mesh.scale.set(
+
+                1 +
+                wave * .025,
+
+                1 +
+                wave * .025,
+
+                1
+
+            );
+
+
+            ring.mesh.material.opacity =
+
+                .10 +
+                wave * .38;
+
+        }
+
+    );
+
+
+    /* =====================================================
+       FLOOR LIGHT BEAMS
+    ===================================================== */
+
+    floorBeams.forEach(
+
+        beam => {
+
+            const pulse =
+
+                (
+                    Math.sin(
+                        time * .65 +
+                        beam.phase
+                    ) + 1
+                ) * .5;
+
+
+            beam.mesh.material.opacity =
+
+                .06 +
+                pulse * .20;
+
+
+            beam.mesh.scale.y =
+
+                3.0 +
+                pulse * 1.5;
+
+        }
+
+    );
+
+
+    /* =====================================================
+       FOG
+    ===================================================== */
+
+    fogObjects.forEach(
+
+        fog => {
+
+            const t =
+
+                time *
+                fog.speed +
+                fog.phase;
+
+
+            fog.mesh.position.x =
+
+                fog.x +
+
+                Math.sin(t) *
+                fog.amplitude +
+
+                Math.sin(
+                    t * .27
+                ) * 1.5;
+
+
+            fog.mesh.position.y =
+
+                fog.y +
+
+                Math.sin(
+                    t * .63
+                ) * .8;
+
+
+            fog.mesh.position.z =
+
+                fog.z +
+
+                Math.cos(
+                    t * .43
+                ) * 2.8;
+
+
+            fog.mesh.material.opacity =
+
+                .018 +
+
+                (
+                    Math.sin(
+                        t * .7
+                    ) + 1
+                ) * .035;
+
+        }
+
+    );
+
+
+    /* =====================================================
+       PLATFORMS
+    ===================================================== */
+
+    platforms.forEach(
+
+        platform => {
+
+            const t =
+
+                time +
+                platform.phase;
+
+
+            platform.mesh.position.y =
+
+                platform.y +
+
+                Math.sin(
+                    t * .3
+                ) * .12;
+
+
+            platform.mesh.rotation.y =
+
+                Math.sin(
+                    t * .08
+                ) * .008;
+
+        }
+
+    );
+
+
+    /* =====================================================
+       CODE
+    ===================================================== */
+
+    holographicCodes.forEach(
+
+        code => {
+
+            const t =
+
+                time *
+                code.speed +
+                code.phase;
+
+
+            code.mesh.position.x =
+
+                code.x +
+
+                Math.sin(t) *
+                code.amplitude +
+
+                Math.sin(
+                    t * .27
+                ) * 1.0;
+
+
+            code.mesh.position.y =
+
+                code.y +
+
+                Math.sin(
+                    t * .63
+                ) *
+                code.amplitude;
+
+
+            code.mesh.position.z =
+
+                code.z +
+
+                Math.cos(
+                    t * .37
+                ) * 1.8;
+
+
+            code.mesh.rotation.z =
+
+                Math.sin(
+                    t * .3
+                ) * .05;
+
+
+            code.mesh.material.opacity =
+
+                .10 +
+
+                (
+                    Math.sin(
+                        t * .8
+                    ) + 1
+                ) * .13;
+
+        }
+
+    );
+
+
+    /* =====================================================
+       HOLOGRAM PANELS
+    ===================================================== */
+
+    panels.forEach(
+
+        panel => {
+
+            const pulse =
+
+                (
+                    Math.sin(
+
+                        time * .45 +
+                        panel.phase
+
+                    ) + 1
+                ) * .5;
+
+
+            panel.group.position.y +=
+
+                Math.sin(
+
+                    time * .3 +
+                    panel.phase
+
+                ) * .001;
+
+
+            panel.group.children[0]
+                .material
+                .opacity =
+
+                .025 +
+                pulse * .045;
+
+        }
+
+    );
+
+
+    /* =====================================================
+       PARTICLES
+    ===================================================== */
+
+    const positions =
+
+        particleGeometry
+            .attributes
+            .position
+            .array;
+
+
+    for (
+
+        let i = 0;
+
+        i < particleCount;
+
+        i++
+
+    ) {
+
+        const i3 =
+            i * 3;
+
+
+        positions[i3 + 1] +=
+
+            particleSpeeds[i];
+
+
+        positions[i3] +=
+
+            Math.sin(
+
+                time * .15 +
+                i
+
+            ) * .001;
+
+
+        if (
+
+            positions[i3 + 1] >
+            46
+
+        ) {
+
+            positions[i3 + 1] =
+                0;
+
+        }
+
+    }
+
+
+    particleGeometry
+        .attributes
+        .position
+        .needsUpdate =
+        true;
+
+
+    /* =====================================================
+       CITY
+    ===================================================== */
+
+    city.position.y =
+
+        Math.sin(
+            time * .18
+        ) * .12;
+
+
+    /* =====================================================
+       LIGHT BEAM
+    ===================================================== */
+
+    beamMaterial
+        .uniforms
+        .time
+        .value =
+        time;
+
+
+    /* =====================================================
+       SUBTLE WORLD MOVEMENT
+    ===================================================== */
+
+    scene.rotation.y =
+
+        Math.sin(
+            time * .025
+        ) * .003;
+
+
+    /* =====================================================
+       RENDER
+    ===================================================== */
+
+    renderer.render(
+
+        scene,
+        camera
+
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+animate();
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+
+    "resize",
+
+    () => {
+
+        camera.aspect =
+
+            window.innerWidth /
+            window.innerHeight;
+
+
+        camera.updateProjectionMatrix();
+
+
+        renderer.setSize(
+
+            window.innerWidth,
+            window.innerHeight
+
+        );
+
+
+        renderer.setPixelRatio(
+
+            Math.min(
+
+                window.devicePixelRatio,
+                2
+
+            )
+
+        );
+
+    }
+
+);
+
+</script>
+
+
+<style>
+#training-button{position:fixed;z-index:9999;right:0;bottom:18vh;width:60vw;min-width:680px;height:90px;border:0;border-radius:48px 0 0 48px;background:rgba(175,175,175,.52);color:#111;cursor:pointer;padding:0 42px 0 40px;display:flex;align-items:center;justify-content:flex-end;text-align:right;font-family:"Noto Sans KR","Segoe UI",Arial,sans-serif;transition:background .18s ease,transform .18s ease}
+#training-button:hover{background:rgba(155,155,155,.62)}
+#training-button:active{transform:translateX(3px)}
+#training-button .ko{display:block;font-size:28px;line-height:1.05;font-weight:700;letter-spacing:-.04em}
+#training-button .en{display:block;margin-top:5px;font-size:13px;line-height:1;font-weight:500}
+@media(max-width:900px){#training-button{width:68vw;min-width:0;height:78px;bottom:14vh;padding-right:28px}#training-button .ko{font-size:23px}#training-button .en{font-size:11px}}
+</style>
+<button id="training-button" type="button" aria-label="트레이닝 시작하기"><span><span class="ko">트레이닝</span><span class="en">TRAINING</span></span></button>
+<script>document.getElementById("training-button").addEventListener("click",function(){window.location.href="index2.html";});</script>
+
+</body>
+</html>
