@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full bg-[#0a0d18] text-[#D5EAF9] overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO-STAGE 2099 // PASTELLIC IDOL ENGINE</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Space Grotesk & Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- MediaPipe Pose JS Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        space: ['Space Grotesk', 'sans-serif'],
+                        noto: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        pastel: {
+                            ice: '#D5EAF9',      // Highlight / Soft Sky
+                            slate: '#6488B1',    // Atmospheric Blue / Accents
+                            pink: '#F2D6F8',     // Pastel Pink / Hologram Accent
+                            darkBg: '#090d16',   // Deep Space Ambient Dark
+                            panelBg: 'rgba(15, 23, 42, 0.65)',
+                            lightGlass: 'rgba(213, 234, 249, 0.08)'
+                        }
+                    },
+                    boxShadow: {
+                        'pastel-ice': '0 0 25px rgba(213, 234, 249, 0.25), 0 0 50px rgba(213, 234, 249, 0.1)',
+                        'pastel-pink': '0 0 25px rgba(242, 214, 248, 0.3), 0 0 50px rgba(242, 214, 248, 0.15)',
+                        'pastel-slate': '0 0 20px rgba(100, 136, 177, 0.4)',
+                        'glass-inner': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.2)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Space Grotesk', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #111a2e 0%, #080c15 100%);
+            user-select: none;
+            overflow: hidden;
+            color: #D5EAF9;
+        }
+
+        .font-space { font-family: 'Space Grotesk', sans-serif; }
+
+        .pastel-glass {
+            background: rgba(18, 26, 43, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(213, 234, 249, 0.18);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .pastel-glass-light {
+            background: rgba(240, 244, 248, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .pastel-glass-pink {
+            background: rgba(30, 20, 38, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(242, 214, 248, 0.25);
+            box-shadow: inset 0 1px 0 0 rgba(242, 214, 248, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-glow-ice {
+            text-shadow: 0 0 12px rgba(213, 234, 249, 0.6), 0 0 24px rgba(213, 234, 249, 0.3);
+        }
+
+        .text-glow-pink {
+            text-shadow: 0 0 12px rgba(242, 214, 248, 0.6), 0 0 24px rgba(242, 214, 248, 0.3);
+        }
+
+        canvas { touch-action: none; }
+    </style>
+</head>
+
+<body class="h-full text-[#D5EAF9] flex flex-col justify-between relative select-none">
+
+    <!-- background animation canvas -->
+    <canvas id="bgCanvas" class="fixed inset-0 z-0 pointer-events-none opacity-80"></canvas>
+
+    <!-- Main Container -->
+    <div id="appContainer" class="relative z-20 h-full flex flex-col justify-between">
+
+        <!-- GLOBAL TOP HUD (두번째.png 모바일/게임 UI 레이아웃) -->
+        <header id="globalTopHud" class="w-full px-6 py-4 flex items-center justify-between z-30">
+            <!-- Left: Back Button -->
+            <button id="btnNavBack" class="w-12 h-12 rounded-full bg-white/90 text-slate-800 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </button>
+
+            <!-- Center & Right: Status Counters (Rank, Currency, Energy, Menu) -->
+            <div class="flex items-center gap-3 md:gap-4">
+                <!-- Rank -->
+                <div class="px-4 py-2 bg-white/90 text-slate-800 rounded-full font-bold text-sm flex items-center gap-2 shadow-md">
+                    <i data-lucide="music" class="w-4 h-4 text-slate-700"></i>
+                    <span>랭크</span>
+                    <span class="text-base font-space">12</span>
+                </div>
+
+                <!-- Currency -->
+                <div class="px-4 py-2 bg-white/90 text-slate-800 rounded-full font-bold text-sm flex items-center gap-2 shadow-md">
+                    <div class="w-4 h-4 bg-slate-800 rotate-45 flex items-center justify-center text-[8px] text-white">◆</div>
+                    <span class="font-space">1000</span>
+                    <button class="w-5 h-5 bg-slate-200 rounded-full flex items-center justify-center text-xs font-bold hover:bg-slate-300">+</button>
+                </div>
+
+                <!-- Stamina / Energy -->
+                <div class="px-4 py-2 bg-white/90 text-slate-800 rounded-full font-bold text-sm flex items-center gap-2 shadow-md">
+                    <i data-lucide="zap" class="w-4 h-4 fill-slate-800 text-slate-800"></i>
+                    <span class="font-space">25/25</span>
+                    <i data-lucide="settings" class="w-4 h-4 text-slate-500 cursor-pointer hover:rotate-45 transition-all"></i>
+                </div>
+
+                <!-- Menu Button -->
+                <button class="w-12 h-12 rounded-full bg-white/90 text-slate-800 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ========================================================= -->
+        <!-- STEP 1: 트레이닝 선택 화면 (두번째.png 모드 선택 화면) -->
+        <!-- ========================================================= -->
+        <main id="viewModeSelect" class="flex-1 px-6 md:px-12 py-4 flex flex-col md:flex-row items-center justify-between gap-6 max-w-7xl mx-auto w-full z-20">
+            
+            <!-- Left Character Placeholder Area (회색 네모 박스) -->
+            <div class="w-full md:w-5/12 h-[60vh] md:h-[75vh] flex items-end justify-center relative">
+                <div class="w-full h-full bg-gradient-to-t from-slate-400/30 to-slate-300/20 rounded-3xl border-2 border-dashed border-slate-300/40 flex flex-col items-center justify-center p-6 text-center shadow-2xl relative overflow-hidden backdrop-blur-md">
+                    <!-- Character Silhouette Canvas / Placeholder Image -->
+                    <div class="w-48 h-80 md:w-64 md:h-96 bg-slate-300/60 rounded-t-full relative flex items-center justify-center">
+                        <i data-lucide="user" class="w-24 h-24 text-slate-400"></i>
+                    </div>
+                    <span class="mt-4 px-4 py-1.5 bg-slate-800/60 rounded-full text-xs font-noto text-slate-200 tracking-wider">
+                        [캐릭터 영역 준비 중]
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right Selection Card Panel (흰색/연회색 박스 안의 2가지 버튼) -->
+            <div class="w-full md:w-7/12 h-[60vh] md:h-[75vh] pastel-glass-light rounded-[2.5rem] p-6 md:p-10 flex items-center justify-center shadow-2xl">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
+                    
+                    <!-- 댄스 트레이닝 버튼 -->
+                    <button id="btnSelectDance" class="h-56 md:h-64 bg-slate-300/70 hover:bg-slate-300 hover:scale-[1.03] active:scale-95 text-slate-900 rounded-3xl p-6 flex flex-col items-center justify-center text-center transition-all shadow-md group border border-white/50">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-800 text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                            <i data-lucide="activity" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-black font-noto tracking-tight">댄스 트레이닝</h3>
+                        <span class="text-xs font-space text-slate-600 font-bold mt-1 tracking-widest">DANCE TRAINING</span>
+                    </button>
+
+                    <!-- 보컬 트레이닝 버튼 -->
+                    <button id="btnSelectVocal" class="h-56 md:h-64 bg-slate-300/70 hover:bg-slate-300 hover:scale-[1.03] active:scale-95 text-slate-900 rounded-3xl p-6 flex flex-col items-center justify-center text-center transition-all shadow-md group border border-white/50">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-800 text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                            <i data-lucide="mic" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-2xl font-black font-noto tracking-tight">보컬 트레이닝</h3>
+                        <span class="text-xs font-space text-slate-600 font-bold mt-1 tracking-widest">VOCAL TRAINING</span>
+                    </button>
+
+                </div>
+            </div>
+
+        </main>
+
+        <!-- ========================================================= -->
+        <!-- STEP 2: 곡 선택 화면 (각 모드별 5곡씩 선택) -->
+        <!-- ========================================================= -->
+        <main id="viewSongSelect" class="flex-1 p-6 md:p-10 flex flex-col max-w-6xl mx-auto w-full justify-center space-y-6 hidden z-20">
+            <div class="text-center space-y-2">
+                <span id="badgeCategory" class="px-4 py-1.5 bg-[#D5EAF9]/10 border border-[#D5EAF9]/30 rounded-full text-xs font-space text-[#D5EAF9] tracking-widest uppercase">
+                    DANCE TRAINING // SELECT TRACK
+                </span>
+                <h2 id="titleSongSelect" class="text-3xl md:text-5xl font-bold font-space text-transparent bg-clip-text bg-gradient-to-r from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] text-glow-ice">
+                    댄스 트레이닝 곡 선택
+                </h2>
+                <p class="text-[#6488B1] text-sm max-w-lg mx-auto font-noto font-light">연주하고 트레이닝할 곡을 선택한 후 시작 버튼을 누르세요.</p>
+            </div>
+
+            <!-- 곡 카드리스트 (JS 동적 렌더링 - 5곡) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[55vh] overflow-y-auto p-2" id="songGrid">
+            </div>
+
+            <!-- 하드웨어 토글 및 시작 버튼 -->
+            <div class="pastel-glass p-5 rounded-3xl border border-[#6488B1]/30 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <button id="toggleCamBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#6488B1]/30 bg-[#090d16]/50 text-xs font-space hover:border-[#D5EAF9] transition-all">
+                        <i data-lucide="video" class="w-4 h-4 text-[#D5EAF9]"></i>
+                        <span id="camStatusText" class="text-[#6488B1]">CAM: INITIALIZING</span>
+                    </button>
+                    <button id="toggleMicBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#6488B1]/30 bg-[#090d16]/50 text-xs font-space hover:border-[#F2D6F8] transition-all">
+                        <i data-lucide="mic" class="w-4 h-4 text-[#F2D6F8]"></i>
+                        <span id="micStatusText" class="text-[#6488B1]">MIC: INITIALIZING</span>
+                    </button>
+                </div>
+
+                <button id="btnStartGame" class="w-full md:w-auto px-10 py-3.5 rounded-2xl font-space font-bold text-base bg-gradient-to-r from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] text-[#090d16] shadow-pastel-ice hover:shadow-pastel-pink hover:scale-[1.02] active:scale-95 transition-all">
+                    START PERFORMANCE (시작하기)
+                </button>
+            </div>
+        </main>
+
+        <!-- ========================================================= -->
+        <!-- STEP 3: 게임 실행 화면 (웹캠 댄스 or 마이크 보컬) -->
+        <!-- ========================================================= -->
+        <main id="viewStage" class="flex-1 relative flex flex-col justify-between p-4 md:p-6 hidden z-20">
+            
+            <!-- 상단 게임 HUD -->
+            <div class="w-full flex items-center justify-between gap-4 z-30">
+                <div class="pastel-glass px-5 py-3 rounded-2xl border-l-4 border-l-[#D5EAF9] flex items-center gap-4">
+                    <div class="w-9 h-9 rounded-full bg-[#D5EAF9]/10 flex items-center justify-center text-[#D5EAF9]">
+                        <i data-lucide="music" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-[#6488B1] font-space uppercase" id="hudTrackGenre">PASTEL CYBER // 128 BPM</p>
+                        <h3 class="font-space font-bold text-base text-[#D5EAF9]" id="hudTrackTitle">NEON VELOCITY</h3>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6 pastel-glass px-6 py-3 rounded-2xl border-r-4 border-r-[#F2D6F8]">
+                    <div class="text-right">
+                        <span class="text-[10px] text-[#6488B1] font-space uppercase block">MULTIPLIER</span>
+                        <span id="hudMultiplier" class="font-space font-bold text-xl text-[#F2D6F8] text-glow-pink">x1.0</span>
+                    </div>
+                    <div class="h-7 w-px bg-[#6488B1]/30"></div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-[#6488B1] font-space uppercase block">TOTAL SCORE</span>
+                        <span id="hudScore" class="font-space font-bold text-2xl md:text-3xl text-[#D5EAF9] text-glow-ice">000,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 메인 스테이지 뷰어 (웹캠 + 졸라맨 가이드 or TJ 음정 그래프) -->
+            <div class="relative flex-1 my-4 flex items-center justify-center overflow-hidden rounded-3xl pastel-glass border border-[#6488B1]/30">
+                
+                <!-- 파티클 비트 캔버스 -->
+                <canvas id="stageEffectCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
+
+                <!-- 1. 댄스 모드 (웹캠 비디오 + 골격 + 졸라맨 가이드) -->
+                <div id="danceStageContainer" class="relative w-full h-full flex items-center justify-center">
+                    <video id="webcamVideo" class="absolute inset-0 w-full h-full object-cover opacity-35 transform -scale-x-100" autoplay playsinline muted></video>
+                    <canvas id="poseCanvas" class="absolute inset-0 w-full h-full object-cover z-20"></canvas>
+
+                    <!-- 모션 가이드 패널 -->
+                    <div id="stickmanGuideContainer" class="absolute right-6 top-6 bottom-6 w-64 md:w-80 pastel-glass-pink rounded-3xl p-5 flex flex-col items-center justify-between border border-[#F2D6F8]/40 z-30 shadow-pastel-pink">
+                        <div class="text-center w-full">
+                            <span class="text-[10px] font-space text-[#F2D6F8] tracking-widest uppercase block">STAGE POSE GUIDE</span>
+                            <h4 id="poseName" class="font-noto font-bold text-lg text-[#D5EAF9] mt-0.5">기본 T-포즈</h4>
+                        </div>
+
+                        <!-- 가이드 포즈 캔버스 -->
+                        <div class="w-full h-48 md:h-56 bg-[#070b14]/70 rounded-2xl border border-[#F2D6F8]/30 relative flex items-center justify-center my-2 shadow-inner">
+                            <canvas id="stickmanGuideCanvas" class="w-full h-full"></canvas>
+                        </div>
+
+                        <!-- 실시간 싱크로율 게이지 -->
+                        <div class="w-full space-y-1.5">
+                            <div class="flex justify-between text-xs font-space">
+                                <span class="text-[#6488B1]">POSE ACCURACY</span>
+                                <span id="syncPercentText" class="text-[#D5EAF9] font-bold">0%</span>
+                            </div>
+                            <div class="w-full bg-[#080d18] rounded-full h-2.5 overflow-hidden border border-[#6488B1]/30">
+                                <div id="syncBar" class="bg-gradient-to-r from-[#6488B1] via-[#D5EAF9] to-[#F2D6F8] h-full w-0 transition-all duration-100"></div>
+                            </div>
+                        </div>
+
+                        <div class="w-full mt-1">
+                            <div id="poseTimerBar" class="bg-[#D5EAF9] h-1 rounded-full w-full transition-all duration-75"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 노래 모드 (실시간 음정 분석 그래프) -->
+                <div id="singStageContainer" class="relative w-full h-full flex flex-col justify-center items-center p-6 hidden z-20">
+                    <div class="w-full max-w-4xl h-72 relative pastel-glass rounded-3xl p-5 border border-[#D5EAF9]/30 overflow-hidden shadow-pastel-ice flex flex-col justify-between">
+                        <canvas id="pitchCanvas" class="w-full h-full block z-10"></canvas>
+
+                        <!-- 피치 디스플레이 -->
+                        <div class="absolute top-4 left-4 z-20 bg-[#070b14]/80 border border-[#D5EAF9]/30 px-4 py-2 rounded-xl flex items-center gap-3">
+                            <div id="pitchMatchDot" class="w-3 h-3 rounded-full bg-[#F2D6F8] animate-ping"></div>
+                            <div>
+                                <span class="text-[10px] text-[#6488B1] font-space block">LIVE VOICE PITCH</span>
+                                <span id="pitchFreqDisplay" class="font-space text-[#D5EAF9] font-bold text-xs">--- Hz (C4)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 판정 오버레이 -->
+                <div id="hitFeedback" class="absolute inset-0 pointer-events-none flex items-center justify-center z-40">
+                    <div id="hitText" class="font-space font-bold text-6xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] transform scale-50 opacity-0 transition-all duration-200 text-glow-ice">
+                        PERFECT!
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 하단 HUD -->
+            <div class="w-full flex items-center justify-between gap-4 z-30">
+                <div class="pastel-glass px-6 py-3 rounded-2xl flex items-center gap-4">
+                    <span class="font-space font-bold text-3xl text-[#F2D6F8] text-glow-pink" id="hudCombo">0</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-space text-[#6488B1]">COMBO STREAK</span>
+                        <div class="w-28 h-1.5 bg-[#080d18] rounded-full overflow-hidden border border-[#6488B1]/30">
+                            <div id="comboProgress" class="bg-[#F2D6F8] h-full w-0 transition-all"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 pastel-glass px-6 py-3 rounded-2xl flex flex-col justify-center gap-1">
+                    <div class="flex justify-between text-xs font-space text-[#6488B1]">
+                        <span id="hudTimeCurrent">0:00</span>
+                        <span id="hudTimeTotal">0:45</span>
+                    </div>
+                    <div class="w-full h-2 bg-[#080d18] rounded-full overflow-hidden border border-[#6488B1]/30">
+                        <div id="songProgressBar" class="bg-gradient-to-r from-[#6488B1] via-[#D5EAF9] to-[#F2D6F8] h-full w-0"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ========================================================= -->
+        <!-- RESULT SCREEN: 결과 화면 -->
+        <!-- ========================================================= -->
+        <main id="viewResult" class="flex-1 p-6 md:p-10 flex flex-col max-w-3xl mx-auto w-full justify-center items-center hidden z-20">
+            <div class="w-full pastel-glass rounded-3xl p-8 md:p-10 border border-[#D5EAF9]/30 shadow-pastel-ice text-center space-y-8 relative overflow-hidden">
+                <div class="space-y-2">
+                    <span class="px-4 py-1.5 bg-[#F2D6F8]/10 border border-[#F2D6F8]/30 rounded-full text-xs font-space text-[#F2D6F8] tracking-widest uppercase">
+                        TRAINING COMPLETED
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-bold font-space text-[#D5EAF9]">STAGE CLEAR</h2>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-around gap-8 my-6 py-6 border-y border-[#6488B1]/20">
+                    <div class="relative">
+                        <div class="w-36 h-36 rounded-full bg-gradient-to-br from-[#D5EAF9]/10 to-[#F2D6F8]/20 border border-[#D5EAF9]/40 flex items-center justify-center shadow-pastel-pink">
+                            <span id="resultRank" class="font-space font-bold text-7xl text-transparent bg-clip-text bg-gradient-to-tr from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] animate-pulse">S+</span>
+                        </div>
+                    </div>
+
+                    <div class="text-left space-y-3 font-noto">
+                        <div>
+                            <span class="text-xs text-[#6488B1] block font-space">TOTAL SCORE</span>
+                            <span id="resultFinalScore" class="font-space font-bold text-3xl text-[#D5EAF9]">895,400</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-xs md:text-sm pt-2">
+                            <div><span class="text-[#6488B1]">최대 콤보:</span> <b id="resultMaxCombo" class="text-[#F2D6F8]">124</b></div>
+                            <div><span class="text-[#6488B1]">PERFECT:</span> <b id="resultPerfect" class="text-[#D5EAF9]">82</b></div>
+                            <div><span class="text-[#6488B1]">평균 싱크로율:</span> <b id="resultAccuracy" class="text-[#D5EAF9]">96.4%</b></div>
+                            <div><span class="text-[#6488B1]">GREAT:</span> <b id="resultGreat" class="text-[#6488B1]">18</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center pt-2 font-noto">
+                    <button id="btnReplay" class="px-8 py-3.5 rounded-xl font-bold bg-[#090d16]/60 hover:bg-[#090d16] text-[#D5EAF9] border border-[#6488B1]/40 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 다시 도전하기
+                    </button>
+                    <button id="btnSongSelect" class="px-8 py-3.5 rounded-xl font-bold bg-gradient-to-r from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] text-[#090d16] shadow-pastel-ice hover:scale-105 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="music-2" class="w-4 h-4"></i> 다른 곡 선택
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="w-full px-6 py-3 border-t border-[#6488B1]/15 pastel-glass text-center text-xs text-[#6488B1] font-space flex justify-between items-center z-20">
+            <span>NEO-STAGE 2099 // PASTELLIC IDOL ENGINE</span>
+            <span>SYSTEM: <span class="text-[#D5EAF9]">ONLINE</span></span>
+        </footer>
+
+    </div>
+
+    <script>
+        // 졸라맨 포즈 가이드 데이터
+        const STICKMAN_POSES = {
+            'T_POSE': { name: '기본 T-포즈', leftHand: { x: -0.8, y: 0.0 }, rightHand: { x: 0.8, y: 0.0 }, head: { x: 0, y: -0.7 } },
+            'ARMS_UP': { name: '양손 하늘로!', leftHand: { x: -0.4, y: -0.9 }, rightHand: { x: 0.4, y: -0.9 }, head: { x: 0, y: -0.6 } },
+            'LEFT_UP': { name: '왼손 하늘 치기!', leftHand: { x: -0.6, y: -0.9 }, rightHand: { x: 0.6, y: 0.4 }, head: { x: 0, y: -0.6 } },
+            'RIGHT_UP': { name: '오른손 하늘 치기!', leftHand: { x: -0.6, y: 0.4 }, rightHand: { x: 0.6, y: -0.9 }, head: { x: 0, y: -0.6 } },
+            'CROSS_ARMS': { name: '크로스 팔 웨이브', leftHand: { x: 0.3, y: -0.2 }, rightHand: { x: -0.3, y: -0.2 }, head: { x: 0, y: -0.6 } },
+            'HEART': { name: '하트 포즈', leftHand: { x: -0.15, y: -0.6 }, rightHand: { x: 0.15, y: -0.6 }, head: { x: 0, y: -0.6 } }
+        };
+
+        // 댄스 트레이닝 전용 5곡
+        const DANCE_SONGS = [
+            {
+                id: 'dance_1',
+                title: 'PASTEL VELOCITY',
+                artist: 'CYBER-VAMP // DANCE 01',
+                genre: '사이버 팝 / 128 BPM',
+                bpm: 128,
+                duration: 45,
+                difficulty: '보통',
+                notes: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+                poses: ['T_POSE', 'ARMS_UP', 'LEFT_UP', 'RIGHT_UP', 'CROSS_ARMS', 'HEART']
+            },
+            {
+                id: 'dance_2',
+                title: 'HOLOGRAPHIC DREAMS',
+                artist: 'AESPA-STYLE // DANCE 02',
+                genre: '퓨처 베이스 / 140 BPM',
+                bpm: 140,
+                duration: 50,
+                difficulty: '어려움',
+                notes: [329.63, 349.23, 392.00, 440.00, 392.00, 349.23, 329.63, 293.66],
+                poses: ['ARMS_UP', 'HEART', 'RIGHT_UP', 'T_POSE', 'LEFT_UP', 'CROSS_ARMS']
+            },
+            {
+                id: 'dance_3',
+                title: 'QUANTUM BEAT 2099',
+                artist: 'XG-STYLE // DANCE 03',
+                genre: '하이퍼 팝 / 150 BPM',
+                bpm: 150,
+                duration: 40,
+                difficulty: '익스트림',
+                notes: [440.00, 493.88, 523.25, 587.33, 659.25, 587.33, 523.25, 493.88],
+                poses: ['LEFT_UP', 'RIGHT_UP', 'CROSS_ARMS', 'HEART', 'ARMS_UP', 'T_POSE']
+            },
+            {
+                id: 'dance_4',
+                title: 'CYBER DANCE RUSH',
+                artist: 'NEO LIGHTS // DANCE 04',
+                genre: '일렉트로 EDM / 132 BPM',
+                bpm: 132,
+                duration: 45,
+                difficulty: '보통',
+                notes: [293.66, 329.63, 349.23, 392.00, 440.00, 392.00, 349.23, 329.63],
+                poses: ['T_POSE', 'LEFT_UP', 'ARMS_UP', 'CROSS_ARMS', 'HEART', 'RIGHT_UP']
+            },
+            {
+                id: 'dance_5',
+                title: 'HYPER DRIVE STAGE',
+                artist: 'PASTEL OVERDRIVE // DANCE 05',
+                genre: '테크노 드라이브 / 145 BPM',
+                bpm: 145,
+                duration: 50,
+                difficulty: '어려움',
+                notes: [349.23, 392.00, 440.00, 493.88, 523.25, 587.33, 523.25, 493.88],
+                poses: ['CROSS_ARMS', 'HEART', 'T_POSE', 'ARMS_UP', 'RIGHT_UP', 'LEFT_UP']
+            }
+        ];
+
+        // 보컬 트레이닝 전용 5곡
+        const VOCAL_SONGS = [
+            {
+                id: 'vocal_1',
+                title: 'VOX STARLIGHT',
+                artist: 'LUNA ECHO // VOCAL 01',
+                genre: '발라드 팝 / 110 BPM',
+                bpm: 110,
+                duration: 45,
+                difficulty: '쉬움',
+                notes: [261.63, 293.66, 329.63, 349.23, 329.63, 293.66, 261.63, 293.66],
+                poses: []
+            },
+            {
+                id: 'vocal_2',
+                title: 'ECHOES OF NEON',
+                artist: 'SYNTH HARMONY // VOCAL 02',
+                genre: '시티팝 / 120 BPM',
+                bpm: 120,
+                duration: 45,
+                difficulty: '보통',
+                notes: [293.66, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66, 329.63],
+                poses: []
+            },
+            {
+                id: 'vocal_3',
+                title: 'CYBER RESONANCE',
+                artist: 'VOX ENGINE // VOCAL 03',
+                genre: '알앤비 퓨처 / 135 BPM',
+                bpm: 135,
+                duration: 50,
+                difficulty: '보통',
+                notes: [329.63, 349.23, 440.00, 493.88, 440.00, 349.23, 329.63, 349.23],
+                poses: []
+            },
+            {
+                id: 'vocal_4',
+                title: 'GALACTIC HARMONY',
+                artist: 'STELLAR CHORUS // VOCAL 04',
+                genre: '심포닉 사이버 / 125 BPM',
+                bpm: 125,
+                duration: 50,
+                difficulty: '어려움',
+                notes: [392.00, 440.00, 523.25, 587.33, 523.25, 440.00, 392.00, 440.00],
+                poses: []
+            },
+            {
+                id: 'vocal_5',
+                title: 'VIRTUAL HIGH NOTE',
+                artist: 'DIVA PROTOCOL // VOCAL 05',
+                genre: '고음 주사파 / 142 BPM',
+                bpm: 142,
+                duration: 40,
+                difficulty: '익스트림',
+                notes: [440.00, 523.25, 587.33, 659.25, 698.46, 659.25, 587.33, 523.25],
+                poses: []
+            }
+        ];
+
+        // 애플리케이션 상태
+        const state = {
+            currentStep: 1, // 1: 모드 선택, 2: 곡 선택, 3: 게임 스테이지
+            mode: 'dance', // 'dance' | 'vocal'
+            selectedSong: DANCE_SONGS[0],
+            isPlaying: false,
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            multiplier: 1.0,
+            perfects: 0,
+            greats: 0,
+            totalNotes: 0,
+            currentTime: 0,
+            songTimer: null,
+            useSimulatedCam: false,
+            useSimulatedMic: false,
+            cameraActive: false,
+            micActive: false,
+            currentPoseKey: 'T_POSE',
+            poseCueTimer: 0,
+            currentSyncPercent: 0,
+            audioCtx: null,
+            micAnalyser: null,
+            micStream: null,
+            currentPitchHz: 0,
+            targetPitchHz: 0
+        };
+
+        // DOM 요소 참조
+        const elements = {
+            btnNavBack: document.getElementById('btnNavBack'),
+            viewModeSelect: document.getElementById('viewModeSelect'),
+            viewSongSelect: document.getElementById('viewSongSelect'),
+            viewStage: document.getElementById('viewStage'),
+            viewResult: document.getElementById('viewResult'),
+            
+            // Step 1
+            btnSelectDance: document.getElementById('btnSelectDance'),
+            btnSelectVocal: document.getElementById('btnSelectVocal'),
+            
+            // Step 2
+            badgeCategory: document.getElementById('badgeCategory'),
+            titleSongSelect: document.getElementById('titleSongSelect'),
+            songGrid: document.getElementById('songGrid'),
+            btnStartGame: document.getElementById('btnStartGame'),
+            toggleCamBtn: document.getElementById('toggleCamBtn'),
+            toggleMicBtn: document.getElementById('toggleMicBtn'),
+            camStatusText: document.getElementById('camStatusText'),
+            micStatusText: document.getElementById('micStatusText'),
+            
+            // Step 3 (Stage HUD)
+            hudTrackTitle: document.getElementById('hudTrackTitle'),
+            hudTrackGenre: document.getElementById('hudTrackGenre'),
+            hudScore: document.getElementById('hudScore'),
+            hudMultiplier: document.getElementById('hudMultiplier'),
+            hudCombo: document.getElementById('hudCombo'),
+            comboProgress: document.getElementById('comboProgress'),
+            songProgressBar: document.getElementById('songProgressBar'),
+            hudTimeCurrent: document.getElementById('hudTimeCurrent'),
+            hudTimeTotal: document.getElementById('hudTimeTotal'),
+            
+            // Stage Canvas & Videos
+            bgCanvas: document.getElementById('bgCanvas'),
+            stageEffectCanvas: document.getElementById('stageEffectCanvas'),
+            webcamVideo: document.getElementById('webcamVideo'),
+            poseCanvas: document.getElementById('poseCanvas'),
+            stickmanGuideCanvas: document.getElementById('stickmanGuideCanvas'),
+            pitchCanvas: document.getElementById('pitchCanvas'),
+            danceStageContainer: document.getElementById('danceStageContainer'),
+            singStageContainer: document.getElementById('singStageContainer'),
+            
+            // Stage Feedback
+            poseName: document.getElementById('poseName'),
+            syncBar: document.getElementById('syncBar'),
+            syncPercentText: document.getElementById('syncPercentText'),
+            poseTimerBar: document.getElementById('poseTimerBar'),
+            hitFeedback: document.getElementById('hitFeedback'),
+            hitText: document.getElementById('hitText'),
+            pitchFreqDisplay: document.getElementById('pitchFreqDisplay'),
+            
+            // Result View
+            resultRank: document.getElementById('resultRank'),
+            resultFinalScore: document.getElementById('resultFinalScore'),
+            resultMaxCombo: document.getElementById('resultMaxCombo'),
+            resultPerfect: document.getElementById('resultPerfect'),
+            resultGreat: document.getElementById('resultGreat'),
+            resultAccuracy: document.getElementById('resultAccuracy'),
+            btnReplay: document.getElementById('btnReplay'),
+            btnSongSelect: document.getElementById('btnSongSelect')
+        };
+
+        function initBgCanvas() {
+            const canvas = elements.bgCanvas;
+            const ctx = canvas.getContext('2d');
+            let w = (canvas.width = window.innerWidth);
+            let h = (canvas.height = window.innerHeight);
+
+            window.addEventListener('resize', () => {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            });
+
+            const colors = ['#D5EAF9', '#6488B1', '#F2D6F8'];
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                radius: Math.random() * 2.5 + 1,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                alpha: Math.random() * 0.5 + 0.2
+            }));
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0) p.x = w;
+                    if (p.x > w) p.x = 0;
+                    if (p.y < 0) p.y = h;
+                    if (p.y > h) p.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.alpha;
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = p.color;
+                    ctx.fill();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        class SynthEngine {
+            constructor() {
+                this.ctx = null;
+                this.masterGain = null;
+                this.isPlaying = false;
+                this.step = 0;
+                this.interval = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.value = 0.25;
+                    this.masterGain.connect(this.ctx.destination);
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playKick(time) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(130, time);
+                osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.25);
+                gain.gain.setValueAtTime(0.8, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.25);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(time);
+                osc.stop(time + 0.25);
+            }
+
+            playSynthNote(freq, time, duration = 0.2) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, time);
+                gain.gain.setValueAtTime(0.25, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(time);
+                osc.stop(time + duration);
+            }
+
+            startTrack(song) {
+                this.init();
+                this.stopTrack();
+                this.isPlaying = true;
+                this.step = 0;
+
+                const secondsPerBeat = 60 / song.bpm;
+                const noteSequence = song.notes;
+
+                this.interval = setInterval(() => {
+                    if (!this.isPlaying) return;
+                    const now = this.ctx.currentTime;
+                    if (this.step % 4 === 0) {
+                        this.playKick(now);
+                    }
+                    const noteFreq = noteSequence[this.step % noteSequence.length];
+                    this.playSynthNote(noteFreq, now, secondsPerBeat * 0.7);
+                    this.step++;
+                }, (secondsPerBeat / 2) * 1000);
+            }
+
+            stopTrack() {
+                this.isPlaying = false;
+                if (this.interval) clearInterval(this.interval);
+            }
+        }
+
+        const synth = new SynthEngine();
+        let poseDetector = null;
+
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 },
+                    audio: false
+                });
+                elements.webcamVideo.srcObject = stream;
+                state.cameraActive = true;
+                elements.camStatusText.innerText = "CAM: LIVE";
+                elements.camStatusText.classList.add("text-[#D5EAF9]");
+
+                if (window.Pose) {
+                    poseDetector = new window.Pose({
+                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+                    });
+                    poseDetector.setOptions({
+                        modelComplexity: 1,
+                        smoothLandmarks: true,
+                        minDetectionConfidence: 0.5,
+                        minTrackingConfidence: 0.5
+                    });
+                    poseDetector.onResults(onPoseResults);
+
+                    const camera = new window.Camera(elements.webcamVideo, {
+                        onFrame: async () => {
+                            if (state.isPlaying && state.mode === 'dance' && !state.useSimulatedCam) {
+                                await poseDetector.send({ image: elements.webcamVideo });
+                            }
+                        },
+                        width: 640,
+                        height: 480
+                    });
+                    camera.start();
+                }
+            } catch (err) {
+                state.useSimulatedCam = true;
+                elements.camStatusText.innerText = "CAM: SIMULATED";
+                elements.camStatusText.classList.add("text-[#F2D6F8]");
+            }
+        }
+
+        async function setupMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                synth.init();
+                state.micStream = stream;
+                const source = synth.ctx.createMediaStreamSource(stream);
+                state.micAnalyser = synth.ctx.createAnalyser();
+                state.micAnalyser.fftSize = 2048;
+                source.connect(state.micAnalyser);
+                state.micActive = true;
+                elements.micStatusText.innerText = "MIC: ACTIVE";
+                elements.micStatusText.classList.add("text-[#F2D6F8]");
+            } catch (err) {
+                state.useSimulatedMic = true;
+                elements.micStatusText.innerText = "MIC: SIMULATED";
+                elements.micStatusText.classList.add("text-[#6488B1]");
+            }
+        }
+
+        function onPoseResults(results) {
+            const canvas = elements.poseCanvas;
+            const ctx = canvas.getContext('2d');
+            canvas.width = elements.danceStageContainer.clientWidth;
+            canvas.height = elements.danceStageContainer.clientHeight;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (results.poseLandmarks) {
+                drawHologramSkeleton(ctx, results.poseLandmarks, canvas.width, canvas.height);
+                calculatePoseSyncScore(results.poseLandmarks);
+            }
+        }
+
+        function drawHologramSkeleton(ctx, landmarks, w, h) {
+            const connections = [
+                [11, 12], [11, 13], [13, 15], [12, 14], [14, 16],
+                [11, 23], [12, 24], [23, 24],
+                [23, 25], [25, 27], [24, 26], [26, 28]
+            ];
+
+            ctx.strokeStyle = '#D5EAF9';
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = '#D5EAF9';
+
+            connections.forEach(([i, j]) => {
+                const p1 = landmarks[i];
+                const p2 = landmarks[j];
+                if (p1 && p2 && p1.visibility > 0.4 && p2.visibility > 0.4) {
+                    ctx.beginPath();
+                    ctx.moveTo((1 - p1.x) * w, p1.y * h);
+                    ctx.lineTo((1 - p2.x) * w, p2.y * h);
+                    ctx.stroke();
+                }
+            });
+
+            landmarks.forEach((p) => {
+                if (p.visibility > 0.4) {
+                    ctx.beginPath();
+                    ctx.arc((1 - p.x) * w, p.y * h, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#F2D6F8';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#F2D6F8';
+                    ctx.fill();
+                }
+            });
+        }
+
+        function renderTargetStickman() {
+            const canvas = elements.stickmanGuideCanvas;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2 + 10;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const targetPose = STICKMAN_POSES[state.currentPoseKey] || STICKMAN_POSES['T_POSE'];
+
+            ctx.strokeStyle = '#F2D6F8';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#F2D6F8';
+
+            // 머리
+            const headX = cx + targetPose.head.x * 55;
+            const headY = cy + targetPose.head.y * 55;
+            ctx.beginPath();
+            ctx.arc(headX, headY, 16, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 몸통
+            const neckY = headY + 16;
+            const hipY = cy + 35;
+            ctx.beginPath();
+            ctx.moveTo(cx, neckY);
+            ctx.lineTo(cx, hipY);
+            ctx.stroke();
+
+            // 팔
+            const leftHandX = cx + targetPose.leftHand.x * 65;
+            const leftHandY = cy + targetPose.leftHand.y * 65;
+            const rightHandX = cx + targetPose.rightHand.x * 65;
+            const rightHandY = cy + targetPose.rightHand.y * 65;
+
+            const shoulderY = neckY + 8;
+            ctx.beginPath();
+            ctx.moveTo(cx, shoulderY);
+            ctx.lineTo(leftHandX, leftHandY);
+            ctx.moveTo(cx, shoulderY);
+            ctx.lineTo(rightHandX, rightHandY);
+            ctx.stroke();
+
+            // 다리
+            ctx.beginPath();
+            ctx.moveTo(cx, hipY);
+            ctx.lineTo(cx - 22, hipY + 45);
+            ctx.moveTo(cx, hipY);
+            ctx.lineTo(cx + 22, hipY + 45);
+            ctx.stroke();
+
+            [ {x: leftHandX, y: leftHandY}, {x: rightHandX, y: rightHandY} ].forEach(pt => {
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#D5EAF9';
+                ctx.fill();
+            });
+        }
+
+        function calculatePoseSyncScore(landmarks) {
+            if (!landmarks || state.useSimulatedCam) {
+                state.currentSyncPercent = Math.floor(78 + Math.sin(Date.now() / 250) * 18);
+                updateSyncUI();
+                return;
+            }
+
+            const target = STICKMAN_POSES[state.currentPoseKey];
+            if (!target) return;
+
+            const leftWrist = landmarks[15];
+            const rightWrist = landmarks[16];
+            const nose = landmarks[0];
+
+            if (leftWrist && rightWrist && nose) {
+                const playerLeftX = (1 - leftWrist.x) - (1 - nose.x);
+                const playerLeftY = leftWrist.y - nose.y;
+                const playerRightX = (1 - rightWrist.x) - (1 - nose.x);
+                const playerRightY = rightWrist.y - nose.y;
+
+                const distLeft = Math.hypot(playerLeftX - target.leftHand.x * 0.45, playerLeftY - target.leftHand.y * 0.45);
+                const distRight = Math.hypot(playerRightX - target.rightHand.x * 0.45, playerRightY - target.rightHand.y * 0.45);
+
+                const totalDist = (distLeft + distRight) / 2;
+                let sync = Math.max(0, Math.min(100, Math.round((1 - totalDist) * 100)));
+                state.currentSyncPercent = sync;
+                updateSyncUI();
+            }
+        }
+
+        function updateSyncUI() {
+            elements.syncPercentText.innerText = `${state.currentSyncPercent}%`;
+            elements.syncBar.style.width = `${state.currentSyncPercent}%`;
+        }
+
+        function autoCorrelate(buf, sampleRate) {
+            let SIZE = buf.length;
+            let rms = 0;
+            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.01) return -1;
+
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+            for (let i = 0; i < SIZE / 2; i++) {
+                if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+            }
+            for (let i = 1; i < SIZE / 2; i++) {
+                if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+            }
+
+            buf = buf.slice(r1, r2);
+            SIZE = buf.length;
+
+            let c = new Array(SIZE).fill(0);
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE - i; j++) {
+                    c[i] = c[i] + buf[j] * buf[j + i];
+                }
+            }
+
+            let d = 0;
+            while (c[d] > c[d + 1]) d++;
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < SIZE; i++) {
+                if (c[i] > maxval) {
+                    maxval = c[i];
+                    maxpos = i;
+                }
+            }
+            return sampleRate / maxpos;
+        }
+
+        function renderPitchGraph() {
+            if (state.mode !== 'vocal' || !state.isPlaying) return;
+
+            const canvas = elements.pitchCanvas;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (state.micAnalyser && !state.useSimulatedMic) {
+                const buf = new Float32Array(2048);
+                state.micAnalyser.getFloatTimeDomainData(buf);
+                const pitch = autoCorrelate(buf, synth.ctx.sampleRate);
+                if (pitch > 0) state.currentPitchHz = pitch;
+            } else {
+                const target = state.targetPitchHz || 320;
+                state.currentPitchHz = target + (Math.sin(Date.now() / 180) * 20);
+            }
+
+            const songNotes = state.selectedSong.notes;
+            const noteIdx = Math.floor((state.currentTime / state.selectedSong.duration) * songNotes.length) % songNotes.length;
+            state.targetPitchHz = songNotes[noteIdx];
+
+            elements.pitchFreqDisplay.innerText = state.currentPitchHz > 0 
+                ? `${Math.round(state.currentPitchHz)} Hz` 
+                : "--- Hz";
+
+            const midY = h / 2;
+            const targetY = midY - ((state.targetPitchHz - 350) * 0.75);
+
+            ctx.strokeStyle = 'rgba(100, 136, 177, 0.2)';
+            ctx.lineWidth = 1;
+            for (let y = 20; y < h; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = 'rgba(213, 234, 249, 0.25)';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#D5EAF9';
+            ctx.fillRect(w * 0.25, targetY - 10, w * 0.5, 20);
+            ctx.strokeStyle = '#D5EAF9';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(w * 0.25, targetY - 10, w * 0.5, 20);
+
+            const userY = midY - ((state.currentPitchHz - 350) * 0.75);
+            const clampedUserY = Math.max(15, Math.min(h - 15, userY));
+
+            ctx.beginPath();
+            ctx.arc(w * 0.5, clampedUserY, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#F2D6F8';
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = '#F2D6F8';
+            ctx.fill();
+
+            const pitchDiff = Math.abs(state.currentPitchHz - state.targetPitchHz);
+            if (pitchDiff < 25) {
+                triggerHitFeedback('PERFECT!', '#D5EAF9');
+                addScore(100);
+            } else if (pitchDiff < 55) {
+                triggerHitFeedback('GREAT!', '#F2D6F8');
+                addScore(50);
+            }
+        }
+
+        function renderSongGrid() {
+            const currentSongList = state.mode === 'dance' ? DANCE_SONGS : VOCAL_SONGS;
+            
+            // 모드에 맞춰 현재 선택 곡 자동 갱신
+            if (!currentSongList.some(s => s.id === state.selectedSong.id)) {
+                state.selectedSong = currentSongList[0];
+            }
+
+            elements.songGrid.innerHTML = currentSongList.map((song) => `
+                <div data-songid="${song.id}" class="song-card pastel-glass p-5 rounded-3xl border ${state.selectedSong.id === song.id ? 'border-[#D5EAF9] shadow-pastel-ice bg-[#D5EAF9]/10' : 'border-[#6488B1]/20'} hover:border-[#D5EAF9] transition-all cursor-pointer flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-space text-[#D5EAF9] px-2.5 py-1 bg-[#D5EAF9]/10 rounded-full border border-[#D5EAF9]/20 uppercase">${song.genre}</span>
+                            <span class="text-xs font-space text-[#F2D6F8] font-bold">${song.difficulty}</span>
+                        </div>
+                        <h3 class="font-space font-bold text-lg text-[#D5EAF9] tracking-wide">${song.title}</h3>
+                        <p class="text-xs text-[#6488B1] font-noto font-light">${song.artist}</p>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center text-xs text-[#6488B1] font-space pt-3 border-t border-[#6488B1]/20">
+                        <span><i data-lucide="clock" class="inline w-3.5 h-3.5 mr-1 text-[#D5EAF9]"></i>${song.duration}s</span>
+                        <span><i data-lucide="activity" class="inline w-3.5 h-3.5 mr-1 text-[#F2D6F8]"></i>${song.bpm} BPM</span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.song-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = card.getAttribute('data-songid');
+                    state.selectedSong = currentSongList.find(s => s.id === id);
+                    renderSongGrid();
+                });
+            });
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        let hitTimeout = null;
+        function triggerHitFeedback(text, color) {
+            elements.hitText.innerText = text;
+            elements.hitText.style.opacity = '1';
+            elements.hitText.style.transform = 'scale(1.05)';
+
+            clearTimeout(hitTimeout);
+            hitTimeout = setTimeout(() => {
+                elements.hitText.style.opacity = '0';
+                elements.hitText.style.transform = 'scale(0.5)';
+            }, 300);
+        }
+
+        function addScore(basePts) {
+            state.combo++;
+            state.totalNotes++;
+            if (basePts >= 100) state.perfects++;
+            else state.greats++;
+
+            if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+            state.multiplier = 1.0 + Math.floor(state.combo / 10) * 0.2;
+            state.score += Math.round(basePts * state.multiplier);
+
+            elements.hudScore.innerText = state.score.toLocaleString('en-US', { minimumIntegerDigits: 6 });
+            elements.hudMultiplier.innerText = `x${state.multiplier.toFixed(1)}`;
+            elements.hudCombo.innerText = state.combo;
+            elements.comboProgress.style.width = `${Math.min(100, (state.combo % 10) * 10)}%`;
+        }
+
+        function switchStep(step) {
+            state.currentStep = step;
+            
+            // 모든 뷰 감추기
+            elements.viewModeSelect.classList.add('hidden');
+            elements.viewSongSelect.classList.add('hidden');
+            elements.viewStage.classList.add('hidden');
+            elements.viewResult.classList.add('hidden');
+
+            if (step === 1) {
+                // 모드 선택 창 (두번째.png)
+                elements.viewModeSelect.classList.remove('hidden');
+            } else if (step === 2) {
+                // 곡 선택 창 (5곡)
+                elements.viewSongSelect.classList.remove('hidden');
+                
+                if (state.mode === 'dance') {
+                    elements.badgeCategory.innerText = "DANCE TRAINING // SELECT TRACK";
+                    elements.titleSongSelect.innerText = "댄스 트레이닝 곡 선택";
+                } else {
+                    elements.badgeCategory.innerText = "VOCAL TRAINING // SELECT TRACK";
+                    elements.titleSongSelect.innerText = "보컬 트레이닝 곡 선택";
+                }
+                renderSongGrid();
+            } else if (step === 3) {
+                // 게임 스테이지
+                elements.viewStage.classList.remove('hidden');
+            }
+        }
+
+        function startGame() {
+            switchStep(3);
+            
+            state.isPlaying = true;
+            state.score = 0;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.perfects = 0;
+            state.greats = 0;
+            state.totalNotes = 0;
+            state.currentTime = 0;
+            
+            if (state.mode === 'dance') {
+                state.currentPoseKey = state.selectedSong.poses[0] || 'T_POSE';
+            }
+
+            elements.hudTrackTitle.innerText = state.selectedSong.title;
+            elements.hudTrackGenre.innerText = state.selectedSong.genre;
+            elements.hudTimeTotal.innerText = `0:${state.selectedSong.duration < 10 ? '0' : ''}${state.selectedSong.duration}`;
+
+            if (state.mode === 'dance') {
+                elements.danceStageContainer.classList.remove('hidden');
+                elements.singStageContainer.classList.add('hidden');
+                renderTargetStickman();
+            } else {
+                elements.danceStageContainer.classList.add('hidden');
+                elements.singStageContainer.classList.remove('hidden');
+            }
+
+            synth.startTrack(state.selectedSong);
+
+            clearInterval(state.songTimer);
+            state.songTimer = setInterval(() => {
+                if (!state.isPlaying) return;
+                state.currentTime++;
+
+                const cur = state.currentTime;
+                const total = state.selectedSong.duration;
+                elements.hudTimeCurrent.innerText = `0:${cur < 10 ? '0' : ''}${cur}`;
+                elements.songProgressBar.style.width = `${(cur / total) * 100}%`;
+
+                if (state.mode === 'dance') {
+                    handleDancePosePrompts();
+                }
+
+                if (state.currentTime >= total) {
+                    endGame();
+                }
+            }, 1000);
+
+            function stageLoop() {
+                if (state.isPlaying) {
+                    if (state.mode === 'vocal') {
+                        renderPitchGraph();
+                    }
+                    requestAnimationFrame(stageLoop);
+                }
+            }
+            stageLoop();
+        }
+
+        function handleDancePosePrompts() {
+            const poses = state.selectedSong.poses;
+            if (!poses || poses.length === 0) return;
+
+            state.poseCueTimer++;
+            if (state.poseCueTimer >= 3) {
+                state.poseCueTimer = 0;
+                const currentIdx = poses.indexOf(state.currentPoseKey);
+                state.currentPoseKey = poses[(currentIdx + 1) % poses.length];
+
+                const targetPose = STICKMAN_POSES[state.currentPoseKey];
+                elements.poseName.innerText = targetPose ? targetPose.name : '동작';
+
+                renderTargetStickman();
+
+                if (state.currentSyncPercent >= 80) {
+                    triggerHitFeedback('PERFECT!', '#D5EAF9');
+                    addScore(100);
+                } else if (state.currentSyncPercent >= 50) {
+                    triggerHitFeedback('GREAT!', '#F2D6F8');
+                    addScore(50);
+                }
+            }
+        }
+
+        function endGame() {
+            state.isPlaying = false;
+            synth.stopTrack();
+            clearInterval(state.songTimer);
+
+            elements.viewStage.classList.add('hidden');
+            elements.viewResult.classList.remove('hidden');
+
+            let rank = 'S+';
+            const acc = state.totalNotes > 0 ? (state.perfects / state.totalNotes) * 100 : 95;
+            if (acc < 70) rank = 'B';
+            else if (acc < 85) rank = 'A';
+            else if (acc < 92) rank = 'S';
+
+            elements.resultRank.innerText = rank;
+            elements.resultFinalScore.innerText = state.score.toLocaleString();
+            elements.resultMaxCombo.innerText = state.maxCombo;
+            elements.resultPerfect.innerText = state.perfects;
+            elements.resultGreat.innerText = state.greats;
+            elements.resultAccuracy.innerText = `${acc.toFixed(1)}%`;
+
+            if (window.confetti) {
+                confetti({
+                    particleCount: 90,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#D5EAF9', '#6488B1', '#F2D6F8']
+                });
+            }
+        }
+
+        function initApp() {
+            initBgCanvas();
+
+            // 백그라운드 오디오/하드웨어 센서 초기화 (시작 오버레이 없이 자동 준비)
+            synth.init();
+            setupCamera();
+            setupMicrophone();
+
+            // 뒤로가기 버튼
+            elements.btnNavBack.addEventListener('click', () => {
+                if (state.isPlaying) {
+                    state.isPlaying = false;
+                    synth.stopTrack();
+                    clearInterval(state.songTimer);
+                }
+
+                if (state.currentStep === 3) {
+                    switchStep(2);
+                } else if (state.currentStep === 2) {
+                    switchStep(1);
+                } else {
+                    switchStep(1);
+                }
+            });
+
+            // Step 1 모드 선택 버튼 이벤트
+            elements.btnSelectDance.addEventListener('click', () => {
+                state.mode = 'dance';
+                switchStep(2);
+            });
+
+            elements.btnSelectVocal.addEventListener('click', () => {
+                state.mode = 'vocal';
+                switchStep(2);
+            });
+
+            // Step 2 게임 시작 버튼
+            elements.btnStartGame.addEventListener('click', startGame);
+
+            // 결과창 버튼
+            elements.btnReplay.addEventListener('click', startGame);
+            elements.btnSongSelect.addEventListener('click', () => {
+                switchStep(2);
+            });
+
+            // 하드웨어 토글 버튼
+            elements.toggleCamBtn.addEventListener('click', () => {
+                state.useSimulatedCam = !state.useSimulatedCam;
+                elements.camStatusText.innerText = state.useSimulatedCam ? "CAM: SIMULATED" : "CAM: LIVE";
+            });
+
+            elements.toggleMicBtn.addEventListener('click', () => {
+                state.useSimulatedMic = !state.useSimulatedMic;
+                elements.micStatusText.innerText = state.useSimulatedMic ? "MIC: SIMULATED" : "MIC: ACTIVE";
+            });
+
+            if (window.lucide) lucide.createIcons();
+
+            // 초기 step 1 진입
+            switchStep(1);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
