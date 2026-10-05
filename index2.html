@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="h-full bg-[#0a0d18] text-[#D5EAF9] overflow-x-hidden">
+<html lang="ko" class="h-full bg-[#8ed8ff] text-[#083b66] overflow-x-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,20 +50,20 @@
     <style>
         body {
             font-family: 'Noto Sans KR', 'Space Grotesk', sans-serif;
-            background: radial-gradient(circle at 50% 20%, #111a2e 0%, #080c15 100%);
+            background: radial-gradient(circle at 18% 10%, #dff7ff 0%, #9fddff 38%, #4c9fe8 72%, #2470c7 100%);
             user-select: none;
             overflow: hidden;
-            color: #D5EAF9;
+            color: #083b66;
         }
 
         .font-space { font-family: 'Space Grotesk', sans-serif; }
 
         .pastel-glass {
-            background: rgba(18, 26, 43, 0.65);
+            background: rgba(226, 247, 255, 0.58);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(213, 234, 249, 0.18);
-            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.55), 0 12px 35px -12px rgba(19, 86, 145, 0.35);
         }
 
         .pastel-glass-light {
@@ -75,11 +75,11 @@
         }
 
         .pastel-glass-pink {
-            background: rgba(30, 20, 38, 0.6);
+            background: rgba(222, 241, 255, 0.62);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(242, 214, 248, 0.25);
-            box-shadow: inset 0 1px 0 0 rgba(242, 214, 248, 0.2), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.55), 0 12px 35px -12px rgba(19, 86, 145, 0.35);
         }
 
         .text-glow-ice {
@@ -91,6 +91,213 @@
         }
 
         canvas { touch-action: none; }
+
+        /* 댄스 웹캠: 전체 신체가 보이도록 원본 비율을 유지한다. */
+        #danceStageContainer {
+            background: #050914;
+        }
+        #webcamVideo,
+        #poseCanvas {
+            object-fit: contain;
+        }
+        @media (max-width: 900px) {
+            #stickmanGuideContainer {
+                width: 13rem;
+                right: .75rem;
+                top: .75rem;
+                bottom: .75rem;
+                padding: .8rem;
+            }
+        }
+
+
+        /* ===== SONG SELECT REDESIGN ===== */
+        #viewSongSelect.song-select-screen {
+            max-width: 1400px;
+            height: calc(100vh - 130px);
+            min-height: 0;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .song-select-shell {
+            min-height: 0;
+            flex: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 1.25rem;
+            align-items: stretch;
+        }
+        .song-carousel {
+            min-height: 0;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 2rem;
+            padding: 1rem;
+            background: rgba(225, 247, 255, 0.42);
+            border: 1px solid rgba(255,255,255,.65);
+            box-shadow: 0 18px 45px rgba(28, 106, 169, .18);
+            perspective: 1400px;
+            perspective-origin: 50% 50%;
+        }
+        #songGrid {
+            height: 100%;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            scrollbar-width: none;
+            overscroll-behavior: contain;
+            transform-style: preserve-3d;
+            touch-action: pan-y;
+        }
+        #songGrid::-webkit-scrollbar { display: none; }
+        .song-card {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 42%;
+            min-height: 280px;
+            max-height: 420px;
+            top: 29%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: clamp(1.4rem, 4vw, 3rem);
+            border-radius: 1.75rem;
+            cursor: pointer;
+            background: linear-gradient(145deg, rgba(245,252,255,1), rgba(175,226,255,1));
+            border: 2px solid rgba(54,143,211,.18);
+            color: #073b67;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            will-change: transform, opacity, filter;
+            transform:
+                translate3d(var(--stack-x, 0px), var(--stack-y, 0px), var(--stack-z, 0px))
+                rotateX(var(--stack-rot-x, 0deg))
+                rotateY(var(--stack-rot-y, 0deg))
+                rotateZ(var(--stack-rot-z, 0deg))
+                scale(var(--stack-scale, 1));
+            opacity: var(--stack-opacity, 0);
+            filter: blur(var(--stack-blur, 0px));
+            z-index: var(--stack-zindex, 1);
+            transition:
+                transform .52s cubic-bezier(.22,.8,.2,1),
+                opacity .38s ease,
+                filter .38s ease,
+                box-shadow .38s ease,
+                border-color .25s ease;
+        }
+        .song-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(255,255,255,.34), transparent 38%, rgba(49,142,207,.12));
+            opacity: .75;
+            transform: translateZ(1px);
+        }
+        .song-card.song-selected {
+            border-color: rgba(31,119,190,.9);
+            box-shadow: 0 0 0 2px rgba(116,211,255,.25), 0 28px 55px rgba(22,108,178,.28), 0 8px 0 rgba(255,255,255,.18) inset;
+        }
+        .song-card:hover { border-color: rgba(31,119,190,.65); }
+        .song-card h3 { color: #073b67 !important; }
+        .song-card p { color: #246a9e !important; }
+        .song-card .song-index {
+            width: 3rem; height: 3rem; border-radius: 999px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,.75);
+            border: 1px solid rgba(31,119,190,.28);
+            color: #1264a0; font: 700 1rem 'Space Grotesk', sans-serif;
+        }
+        .song-card.stack-front { --stack-opacity: 1; --stack-scale: 1; --stack-y: 0px; --stack-z: 0px; --stack-rot-x: 0deg; --stack-rot-y: 0deg; --stack-zindex: 100; opacity: 1; filter: blur(0); }
+        .song-card.stack-back-1 { --stack-opacity: 1; --stack-scale: .965; --stack-y: -76px; --stack-z: -70px; --stack-rot-x: -5deg; --stack-rot-y: 2.5deg; --stack-zindex: 12; }
+        .song-card.stack-back-2 { --stack-opacity: 1; --stack-scale: .93; --stack-y: -145px; --stack-z: -135px; --stack-rot-x: -8deg; --stack-rot-y: -3deg; --stack-zindex: 8; }
+        .song-card.stack-back-3 { --stack-opacity: 1; --stack-scale: .895; --stack-y: -205px; --stack-z: -195px; --stack-rot-x: -11deg; --stack-rot-y: 4deg; --stack-zindex: 5; }
+        .song-card.stack-hidden { --stack-opacity: 0; --stack-scale: .82; --stack-z: -280px; --stack-y: 0px; --stack-rot-x: -14deg; --stack-rot-y: 0deg; --stack-zindex: 1; pointer-events: none; }
+        .song-card.stack-next { --stack-opacity: 1; --stack-scale: .965; --stack-y: 76px; --stack-z: -70px; --stack-rot-x: 5deg; --stack-rot-y: -2.5deg; --stack-zindex: 11; }
+        .song-card.stack-next-2 { --stack-opacity: 1; --stack-scale: .93; --stack-y: 145px; --stack-z: -135px; --stack-rot-x: 8deg; --stack-rot-y: 3deg; --stack-zindex: 7; }
+        .song-card.stack-next-3 { --stack-opacity: 1; --stack-scale: .895; --stack-y: 205px; --stack-z: -195px; --stack-rot-x: 11deg; --stack-rot-y: -4deg; --stack-zindex: 4; }
+        .song-card.stack-back-1, .song-card.stack-next { --stack-blur: .35px; box-shadow: 0 18px 35px rgba(20, 77, 125, .24); }
+        .song-card.stack-back-2, .song-card.stack-next-2 { --stack-blur: 1.1px; box-shadow: 0 15px 30px rgba(20, 77, 125, .20); }
+        .song-card.stack-back-3, .song-card.stack-next-3 { --stack-blur: 2px; box-shadow: 0 12px 24px rgba(20, 77, 125, .16); }
+        .song-card.stack-forward { animation: songStackForward .52s cubic-bezier(.22,.8,.2,1); }
+        .song-card.stack-backward { animation: songStackBackward .52s cubic-bezier(.22,.8,.2,1); }
+        @keyframes songStackForward {
+            0% { transform: translate3d(0, 0, 80px) rotateY(-9deg) rotateX(5deg) scale(1.025); filter: brightness(1.08); }
+            48% { transform: translate3d(0, -105%, 35px) rotateX(-8deg) rotateY(-13deg) scale(.985); }
+            100% { transform: translate3d(var(--stack-x, 0px), var(--stack-y, 0px), var(--stack-z, 0px)) rotateX(var(--stack-rot-x, 0deg)) rotateY(var(--stack-rot-y, 0deg)) scale(var(--stack-scale, 1)); filter: brightness(1); }
+        }
+        @keyframes songStackBackward {
+            0% { transform: translate3d(0, 0, 80px) rotateY(9deg) rotateX(-5deg) scale(1.025); filter: brightness(1.08); }
+            48% { transform: translate3d(0, 105%, 35px) rotateX(8deg) rotateY(13deg) scale(.985); }
+            100% { transform: translate3d(var(--stack-x, 0px), var(--stack-y, 0px), var(--stack-z, 0px)) rotateX(var(--stack-rot-x, 0deg)) rotateY(var(--stack-rot-y, 0deg)) scale(var(--stack-scale, 1)); filter: brightness(1); }
+        }
+        .album-panel {
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(1rem, 3vw, 2rem);
+            border-radius: 2rem;
+            background: linear-gradient(145deg, rgba(242,251,255,.72), rgba(146,210,247,.42));
+            border: 1px solid rgba(255,255,255,.72);
+            box-shadow: 0 18px 45px rgba(28,106,169,.18);
+        }
+        .album-art {
+            width: min(100%, 390px);
+            aspect-ratio: 1 / 1;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 25px 55px rgba(20,91,150,.28);
+            border: 3px solid rgba(255,255,255,.78);
+            background: #8fd9ff;
+        }
+        .album-art svg { width: 100%; height: 100%; display: block; }
+        .difficulty-wrap { width: min(100%, 390px); margin-top: 1.15rem; }
+        .difficulty-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .55rem; }
+        .difficulty-btn {
+            padding: .72rem .35rem;
+            border-radius: .9rem;
+            border: 1px solid rgba(22,106,169,.25);
+            background: rgba(255,255,255,.58);
+            color: #175a89;
+            font: 800 .78rem 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            transition: .2s;
+        }
+        .difficulty-btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.82); }
+        .difficulty-btn.active {
+            background: linear-gradient(135deg,#dff8ff,#54aeea);
+            color: #05365e;
+            border-color: #1676bb;
+            box-shadow: 0 8px 18px rgba(25,119,186,.24);
+        }
+        #btnStartGame.song-start-btn {
+            width: min(100%, 390px);
+            margin-top: .85rem;
+            padding: .95rem 1.2rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg,#dff8ff 0%,#7ed1ff 48%,#2f82d0 100%);
+            color: #06365d;
+            box-shadow: 0 12px 28px rgba(28,108,177,.28);
+        }
+        .carousel-hint {
+            color: #1c6da3;
+            font-size: .72rem;
+            margin-top: .7rem;
+            letter-spacing: .08em;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        @media (max-width: 767px) {
+            #viewSongSelect.song-select-screen { height: auto; overflow-y: auto; }
+            .song-select-shell { grid-template-columns: 1fr; }
+            .song-carousel { height: 46vh; min-height: 300px; perspective: 1100px; }
+            .album-panel { min-height: 430px; }
+            .album-art { width: min(82vw, 330px); }
+        }
     </style>
 </head>
 
@@ -187,37 +394,53 @@
         <!-- ========================================================= -->
         <!-- STEP 2: 곡 선택 화면 (각 모드별 5곡씩 선택) -->
         <!-- ========================================================= -->
-        <main id="viewSongSelect" class="flex-1 p-6 md:p-10 flex flex-col max-w-6xl mx-auto w-full justify-center space-y-6 hidden z-20">
-            <div class="text-center space-y-2">
-                <span id="badgeCategory" class="px-4 py-1.5 bg-[#D5EAF9]/10 border border-[#D5EAF9]/30 rounded-full text-xs font-space text-[#D5EAF9] tracking-widest uppercase">
+        <main id="viewSongSelect" class="flex-1 flex flex-col max-w-7xl mx-auto w-full justify-center hidden z-20 song-select-screen">
+            <div class="text-center space-y-1 mb-3">
+                <span id="badgeCategory" class="px-4 py-1.5 bg-white/40 border border-white/70 rounded-full text-xs font-space text-[#1264a0] tracking-widest uppercase">
                     DANCE TRAINING // SELECT TRACK
                 </span>
-                <h2 id="titleSongSelect" class="text-3xl md:text-5xl font-bold font-space text-transparent bg-clip-text bg-gradient-to-r from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] text-glow-ice">
+                <h2 id="titleSongSelect" class="text-3xl md:text-5xl font-bold font-space text-[#07538a]">
                     댄스 트레이닝 곡 선택
                 </h2>
-                <p class="text-[#6488B1] text-sm max-w-lg mx-auto font-noto font-light">연주하고 트레이닝할 곡을 선택한 후 시작 버튼을 누르세요.</p>
+                <p class="text-[#246a9e] text-sm max-w-lg mx-auto font-noto font-light">왼쪽에서 마우스 휠로 한 곡씩 넘기고, 오른쪽에서 앨범과 난이도를 선택하세요.</p>
             </div>
 
-            <!-- 곡 카드리스트 (JS 동적 렌더링 - 5곡) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[55vh] overflow-y-auto p-2" id="songGrid">
-            </div>
+            <div class="song-select-shell">
+                <!-- LEFT: one-card-at-a-time wheel carousel -->
+                <section class="song-carousel">
+                    <div id="songGrid" aria-label="곡 목록"></div>
+                </section>
 
-            <!-- 하드웨어 토글 및 시작 버튼 -->
-            <div class="pastel-glass p-5 rounded-3xl border border-[#6488B1]/30 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <button id="toggleCamBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#6488B1]/30 bg-[#090d16]/50 text-xs font-space hover:border-[#D5EAF9] transition-all">
-                        <i data-lucide="video" class="w-4 h-4 text-[#D5EAF9]"></i>
-                        <span id="camStatusText" class="text-[#6488B1]">CAM: INITIALIZING</span>
-                    </button>
-                    <button id="toggleMicBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#6488B1]/30 bg-[#090d16]/50 text-xs font-space hover:border-[#F2D6F8] transition-all">
-                        <i data-lucide="mic" class="w-4 h-4 text-[#F2D6F8]"></i>
-                        <span id="micStatusText" class="text-[#6488B1]">MIC: INITIALIZING</span>
-                    </button>
-                </div>
+                <!-- RIGHT: selected album + difficulty + start -->
+                <section class="album-panel">
+                    <div class="w-full max-w-[390px] flex items-center justify-between mb-2">
+                        <div>
+                            <span class="text-[10px] tracking-[.2em] text-[#2674a6] font-space">SELECTED TRACK</span>
+                            <h3 id="selectedSongTitle" class="font-space font-black text-xl text-[#073b67]">PASTEL VELOCITY</h3>
+                        </div>
+                        <span id="selectedSongBpm" class="px-3 py-1 rounded-full bg-white/65 text-[#1264a0] text-xs font-space font-bold">128 BPM</span>
+                    </div>
 
-                <button id="btnStartGame" class="w-full md:w-auto px-10 py-3.5 rounded-2xl font-space font-bold text-base bg-gradient-to-r from-[#D5EAF9] via-[#6488B1] to-[#F2D6F8] text-[#090d16] shadow-pastel-ice hover:shadow-pastel-pink hover:scale-[1.02] active:scale-95 transition-all">
-                    START PERFORMANCE (시작하기)
-                </button>
+                    <div id="albumArt" class="album-art" aria-label="선택된 곡 앨범자켓"></div>
+
+                    <div class="difficulty-wrap">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-noto font-bold text-[#0b5689]">난이도 선택</span>
+                            <span id="difficultyLabel" class="text-[10px] font-space font-bold text-[#2674a6] uppercase">EASY</span>
+                        </div>
+                        <div class="difficulty-grid">
+                            <button type="button" class="difficulty-btn active" data-difficulty="easy">easy</button>
+                            <button type="button" class="difficulty-btn" data-difficulty="nomal">nomal</button>
+                            <button type="button" class="difficulty-btn" data-difficulty="hard">hard</button>
+                            <button type="button" class="difficulty-btn" data-difficulty="expert">expert</button>
+                        </div>
+                    </div>
+
+                    <button id="btnStartGame" class="song-start-btn font-space font-black text-base hover:scale-[1.02] active:scale-95 transition-all">
+                        GAME START
+                    </button>
+                    <div class="carousel-hint">SCROLL / WHEEL · ONE TRACK AT A TIME</div>
+                </section>
             </div>
         </main>
 
@@ -259,8 +482,13 @@
 
                 <!-- 1. 댄스 모드 (웹캠 비디오 + 골격 + 졸라맨 가이드) -->
                 <div id="danceStageContainer" class="relative w-full h-full flex items-center justify-center">
-                    <video id="webcamVideo" class="absolute inset-0 w-full h-full object-cover opacity-35 transform -scale-x-100" autoplay playsinline muted></video>
-                    <canvas id="poseCanvas" class="absolute inset-0 w-full h-full object-cover z-20"></canvas>
+                    <div id="poseStatusPanel" class="absolute left-5 top-5 z-40 px-4 py-2 rounded-xl bg-[#070b14]/80 border border-[#D5EAF9]/30 backdrop-blur-md text-xs font-space text-[#D5EAF9] shadow-lg">
+                        <span id="poseStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-[#6488B1] mr-2"></span>
+                        <span id="poseStatusText">POSE: INITIALIZING</span>
+                    </div>
+                    <div id="poseErrorText" class="absolute left-5 top-16 z-40 max-w-sm px-3 py-2 rounded-lg bg-red-950/75 border border-red-300/30 text-[10px] leading-relaxed text-red-100 hidden"></div>
+                    <video id="webcamVideo" class="absolute inset-0 w-full h-full object-contain bg-[#050914] opacity-35 transform -scale-x-100" autoplay playsinline muted></video>
+                    <canvas id="poseCanvas" class="absolute inset-0 w-full h-full z-20 pointer-events-none"></canvas>
 
                     <!-- 모션 가이드 패널 -->
                     <div id="stickmanGuideContainer" class="absolute right-6 top-6 bottom-6 w-64 md:w-80 pastel-glass-pink rounded-3xl p-5 flex flex-col items-center justify-between border border-[#F2D6F8]/40 z-30 shadow-pastel-pink">
@@ -291,18 +519,27 @@
                     </div>
                 </div>
 
-                <!-- 2. 노래 모드 (실시간 음정 분석 그래프) -->
-                <div id="singStageContainer" class="relative w-full h-full flex flex-col justify-center items-center p-6 hidden z-20">
-                    <div class="w-full max-w-4xl h-72 relative pastel-glass rounded-3xl p-5 border border-[#D5EAF9]/30 overflow-hidden shadow-pastel-ice flex flex-col justify-between">
+                <!-- 2. 보컬 모드 (오른쪽 → 왼쪽 이동 음정 바 UI) -->
+                <div id="singStageContainer" class="relative w-full h-full flex flex-col justify-center items-center p-4 md:p-6 hidden z-20">
+                    <div class="w-full max-w-5xl h-80 relative pastel-glass rounded-3xl p-5 border border-[#D5EAF9]/30 overflow-hidden shadow-pastel-ice">
                         <canvas id="pitchCanvas" class="w-full h-full block z-10"></canvas>
+
+                        <!-- 판정선 -->
+                        <div class="absolute top-12 bottom-12 left-[24%] w-px bg-[#F2D6F8]/70 shadow-pastel-pink z-20 pointer-events-none"></div>
+                        <div class="absolute left-[24%] bottom-4 -translate-x-1/2 text-[9px] font-space tracking-widest text-[#F2D6F8] z-20 pointer-events-none">JUDGE</div>
 
                         <!-- 피치 디스플레이 -->
                         <div class="absolute top-4 left-4 z-20 bg-[#070b14]/80 border border-[#D5EAF9]/30 px-4 py-2 rounded-xl flex items-center gap-3">
                             <div id="pitchMatchDot" class="w-3 h-3 rounded-full bg-[#F2D6F8] animate-ping"></div>
                             <div>
                                 <span class="text-[10px] text-[#6488B1] font-space block">LIVE VOICE PITCH</span>
-                                <span id="pitchFreqDisplay" class="font-space text-[#D5EAF9] font-bold text-xs">--- Hz (C4)</span>
+                                <span id="pitchFreqDisplay" class="font-space text-[#D5EAF9] font-bold text-xs">--- Hz</span>
                             </div>
+                        </div>
+
+                        <div class="absolute right-4 top-4 z-20 text-right">
+                            <span class="text-[9px] text-[#6488B1] font-space block tracking-widest">VOCAL TRACK</span>
+                            <span class="text-[10px] text-[#D5EAF9] font-noto">막대를 따라 음정을 유지하세요</span>
                         </div>
                     </div>
                 </div>
@@ -365,10 +602,13 @@
                             <span id="resultFinalScore" class="font-space font-bold text-3xl text-[#D5EAF9]">895,400</span>
                         </div>
                         <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-xs md:text-sm pt-2">
-                            <div><span class="text-[#6488B1]">최대 콤보:</span> <b id="resultMaxCombo" class="text-[#F2D6F8]">124</b></div>
-                            <div><span class="text-[#6488B1]">PERFECT:</span> <b id="resultPerfect" class="text-[#D5EAF9]">82</b></div>
-                            <div><span class="text-[#6488B1]">평균 싱크로율:</span> <b id="resultAccuracy" class="text-[#D5EAF9]">96.4%</b></div>
-                            <div><span class="text-[#6488B1]">GREAT:</span> <b id="resultGreat" class="text-[#6488B1]">18</b></div>
+                            <div><span class="text-[#6488B1]">최대 콤보:</span> <b id="resultMaxCombo" class="text-[#F2D6F8]">0</b></div>
+                            <div><span class="text-[#6488B1]">PERFECT (100):</span> <b id="resultPerfect" class="text-[#D5EAF9]">0</b></div>
+                            <div><span class="text-[#6488B1]">GREAT (80):</span> <b id="resultGreat" class="text-[#6488B1]">0</b></div>
+                            <div><span class="text-[#6488B1]">GOOD (50):</span> <b id="resultGood" class="text-[#D5EAF9]">0</b></div>
+                            <div><span class="text-[#6488B1]">BAD (20):</span> <b id="resultBad" class="text-[#6488B1]">0</b></div>
+                            <div><span class="text-[#6488B1]">MISS (0):</span> <b id="resultMiss" class="text-[#F2D6F8]">0</b></div>
+                            <div><span class="text-[#6488B1]">평균 판정 정확도:</span> <b id="resultAccuracy" class="text-[#D5EAF9]">0.0%</b></div>
                         </div>
                     </div>
                 </div>
@@ -526,6 +766,7 @@
             currentStep: 1, // 1: 모드 선택, 2: 곡 선택, 3: 게임 스테이지
             mode: 'dance', // 'dance' | 'vocal'
             selectedSong: DANCE_SONGS[0],
+            selectedDifficulty: 'easy',
             isPlaying: false,
             score: 0,
             combo: 0,
@@ -533,7 +774,11 @@
             multiplier: 1.0,
             perfects: 0,
             greats: 0,
+            goods: 0,
+            bads: 0,
+            misses: 0,
             totalNotes: 0,
+            judgementCounts: { PERFECT: 0, GREAT: 0, GOOD: 0, BAD: 0, MISS: 0 },
             currentTime: 0,
             songTimer: null,
             useSimulatedCam: false,
@@ -547,7 +792,16 @@
             micAnalyser: null,
             micStream: null,
             currentPitchHz: 0,
-            targetPitchHz: 0
+            targetPitchHz: 0,
+            vocalBarIndex: -1,
+            vocalBarPitchDiffs: [],
+            vocalJudgementColors: {},
+            stageStartMs: 0,
+            lastJudgedDancePose: -1,
+            poseReady: false,
+            poseFrameBusy: false,
+            poseLoopStarted: false,
+            lastPoseResultMs: 0
         };
 
         // DOM 요소 참조
@@ -566,6 +820,11 @@
             badgeCategory: document.getElementById('badgeCategory'),
             titleSongSelect: document.getElementById('titleSongSelect'),
             songGrid: document.getElementById('songGrid'),
+            selectedSongTitle: document.getElementById('selectedSongTitle'),
+            selectedSongBpm: document.getElementById('selectedSongBpm'),
+            albumArt: document.getElementById('albumArt'),
+            difficultyLabel: document.getElementById('difficultyLabel'),
+            difficultyButtons: document.querySelectorAll('.difficulty-btn'),
             btnStartGame: document.getElementById('btnStartGame'),
             toggleCamBtn: document.getElementById('toggleCamBtn'),
             toggleMicBtn: document.getElementById('toggleMicBtn'),
@@ -588,6 +847,10 @@
             stageEffectCanvas: document.getElementById('stageEffectCanvas'),
             webcamVideo: document.getElementById('webcamVideo'),
             poseCanvas: document.getElementById('poseCanvas'),
+            poseStatusPanel: document.getElementById('poseStatusPanel'),
+            poseStatusDot: document.getElementById('poseStatusDot'),
+            poseStatusText: document.getElementById('poseStatusText'),
+            poseErrorText: document.getElementById('poseErrorText'),
             stickmanGuideCanvas: document.getElementById('stickmanGuideCanvas'),
             pitchCanvas: document.getElementById('pitchCanvas'),
             danceStageContainer: document.getElementById('danceStageContainer'),
@@ -608,6 +871,9 @@
             resultMaxCombo: document.getElementById('resultMaxCombo'),
             resultPerfect: document.getElementById('resultPerfect'),
             resultGreat: document.getElementById('resultGreat'),
+            resultGood: document.getElementById('resultGood'),
+            resultBad: document.getElementById('resultBad'),
+            resultMiss: document.getElementById('resultMiss'),
             resultAccuracy: document.getElementById('resultAccuracy'),
             btnReplay: document.getElementById('btnReplay'),
             btnSongSelect: document.getElementById('btnSongSelect')
@@ -624,7 +890,7 @@
                 h = canvas.height = window.innerHeight;
             });
 
-            const colors = ['#D5EAF9', '#6488B1', '#F2D6F8'];
+            const colors = ['#ffffff', '#bcecff', '#2f8fdb', '#69c7f2'];
             const particles = Array.from({ length: 45 }, () => ({
                 x: Math.random() * w,
                 y: Math.random() * h,
@@ -736,44 +1002,114 @@
         const synth = new SynthEngine();
         let poseDetector = null;
 
+        function setPoseStatus(text, type = 'info') {
+            if (!elements.poseStatusText || !elements.poseStatusDot) return;
+            elements.poseStatusText.innerText = text;
+            elements.poseStatusDot.className = 'inline-block w-2.5 h-2.5 rounded-full mr-2';
+            elements.poseStatusDot.classList.add(
+                type === 'ok' ? 'bg-green-400' :
+                type === 'warn' ? 'bg-yellow-300' :
+                type === 'error' ? 'bg-red-400' : 'bg-[#6488B1]'
+            );
+        }
+
+        function showPoseError(message) {
+            if (!elements.poseErrorText) return;
+            elements.poseErrorText.innerText = message || '';
+            elements.poseErrorText.classList.toggle('hidden', !message);
+        }
+
+        function getCameraErrorMessage(err) {
+            const name = err && err.name ? err.name : 'UNKNOWN';
+            const messages = {
+                NotAllowedError: '카메라 권한이 거부되었습니다. 브라우저의 카메라 권한을 허용해 주세요.',
+                PermissionDeniedError: '카메라 권한이 거부되었습니다. 브라우저의 카메라 권한을 허용해 주세요.',
+                NotFoundError: '사용 가능한 카메라를 찾지 못했습니다.',
+                NotReadableError: '카메라가 다른 프로그램에서 사용 중일 수 있습니다.',
+                OverconstrainedError: '요청한 카메라 해상도를 사용할 수 없습니다.',
+                SecurityError: '보안 정책 때문에 카메라에 접근할 수 없습니다. HTTPS 또는 localhost에서 실행해 주세요.',
+                TypeError: '카메라 API를 사용할 수 없습니다. HTTPS 또는 localhost에서 실행해 주세요.'
+            };
+            return messages[name] || `카메라 초기화 오류: ${name}`;
+        }
+
+        async function processPoseFrame() {
+            if (!poseDetector || state.useSimulatedCam || !state.cameraActive ||
+                !elements.webcamVideo || elements.webcamVideo.readyState < 2 || state.poseFrameBusy) return;
+
+            state.poseFrameBusy = true;
+            try {
+                await poseDetector.send({ image: elements.webcamVideo });
+            } catch (err) {
+                console.error('MediaPipe Pose frame error:', err);
+                setPoseStatus('POSE: FRAME ERROR', 'error');
+                showPoseError(`포즈 분석 중 오류가 발생했습니다: ${err.message || err}`);
+            } finally {
+                state.poseFrameBusy = false;
+            }
+        }
+
+        function startPoseLoop() {
+            if (state.poseLoopStarted) return;
+            state.poseLoopStarted = true;
+            const loop = () => {
+                processPoseFrame();
+                requestAnimationFrame(loop);
+            };
+            requestAnimationFrame(loop);
+        }
+
         async function setupCamera() {
             try {
+                showPoseError('');
+                setPoseStatus('CAMERA: REQUESTING', 'info');
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new DOMException('getUserMedia is not available', 'TypeError');
+                }
+
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 },
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    },
                     audio: false
                 });
+
                 elements.webcamVideo.srcObject = stream;
-                state.cameraActive = true;
-                elements.camStatusText.innerText = "CAM: LIVE";
-                elements.camStatusText.classList.add("text-[#D5EAF9]");
-
-                if (window.Pose) {
-                    poseDetector = new window.Pose({
-                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-                    });
-                    poseDetector.setOptions({
-                        modelComplexity: 1,
-                        smoothLandmarks: true,
-                        minDetectionConfidence: 0.5,
-                        minTrackingConfidence: 0.5
-                    });
-                    poseDetector.onResults(onPoseResults);
-
-                    const camera = new window.Camera(elements.webcamVideo, {
-                        onFrame: async () => {
-                            if (state.isPlaying && state.mode === 'dance' && !state.useSimulatedCam) {
-                                await poseDetector.send({ image: elements.webcamVideo });
-                            }
-                        },
-                        width: 640,
-                        height: 480
-                    });
-                    camera.start();
+                try { await elements.webcamVideo.play(); } catch (e) {
+                    console.warn('video.play() was blocked:', e);
                 }
+
+                state.cameraActive = true;
+                state.useSimulatedCam = false;
+                setPoseStatus('CAMERA: LIVE / POSE: LOADING', 'info');
+
+                if (!window.Pose) throw new Error('MediaPipe Pose library is not loaded.');
+
+                poseDetector = new window.Pose({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+                });
+                poseDetector.setOptions({
+                    modelComplexity: 1,
+                    smoothLandmarks: true,
+                    enableSegmentation: false,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+                poseDetector.onResults(onPoseResults);
+
+                state.poseReady = true;
+                setPoseStatus('CAMERA: LIVE / POSE: READY', 'ok');
+                startPoseLoop();
             } catch (err) {
+                console.error('Camera / Pose initialization error:', err);
+                state.cameraActive = false;
+                state.poseReady = false;
                 state.useSimulatedCam = true;
-                elements.camStatusText.innerText = "CAM: SIMULATED";
-                elements.camStatusText.classList.add("text-[#F2D6F8]");
+                setPoseStatus('CAMERA / POSE: ERROR', 'error');
+                showPoseError(getCameraErrorMessage(err));
             }
         }
 
@@ -787,13 +1123,38 @@
                 state.micAnalyser.fftSize = 2048;
                 source.connect(state.micAnalyser);
                 state.micActive = true;
-                elements.micStatusText.innerText = "MIC: ACTIVE";
-                elements.micStatusText.classList.add("text-[#F2D6F8]");
+                if (elements.micStatusText) {
+                    elements.micStatusText.innerText = "MIC: ACTIVE";
+                    elements.micStatusText.classList.add("text-[#F2D6F8]");
+                }
             } catch (err) {
                 state.useSimulatedMic = true;
-                elements.micStatusText.innerText = "MIC: SIMULATED";
-                elements.micStatusText.classList.add("text-[#6488B1]");
+                if (elements.micStatusText) {
+                    elements.micStatusText.innerText = "MIC: SIMULATED";
+                    elements.micStatusText.classList.add("text-[#6488B1]");
+                }
             }
+        }
+
+        // 웹캠을 object-contain으로 표시할 때 실제 영상이 차지하는 영역을 계산한다.
+        // MediaPipe의 0~1 정규화 좌표도 같은 영역에 맞춰 그려야 손/발까지 정확히 겹친다.
+        function getCameraDisplayRect(canvas) {
+            const video = elements.webcamVideo;
+            const vw = video.videoWidth || 4;
+            const vh = video.videoHeight || 3;
+            const cw = canvas.width;
+            const ch = canvas.height;
+
+            const scale = Math.min(cw / vw, ch / vh);
+            const width = vw * scale;
+            const height = vh * scale;
+
+            return {
+                x: (cw - width) / 2,
+                y: (ch - height) / 2,
+                width,
+                height
+            };
         }
 
         function onPoseResults(results) {
@@ -801,12 +1162,22 @@
             const ctx = canvas.getContext('2d');
             canvas.width = elements.danceStageContainer.clientWidth;
             canvas.height = elements.danceStageContainer.clientHeight;
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            state.lastPoseResultMs = performance.now();
 
-            if (results.poseLandmarks) {
+            if (results.poseLandmarks && results.poseLandmarks.length >= 33) {
+                state.poseReady = true;
+                setPoseStatus('POSE: PERSON DETECTED', 'ok');
+                showPoseError('');
                 drawHologramSkeleton(ctx, results.poseLandmarks, canvas.width, canvas.height);
                 calculatePoseSyncScore(results.poseLandmarks);
+            } else {
+                setPoseStatus(
+                    state.cameraActive ? 'CAMERA: LIVE / PERSON NOT FOUND' : 'POSE: WAITING',
+                    'warn'
+                );
+                state.currentSyncPercent = 0;
+                updateSyncUI();
             }
         }
 
@@ -817,6 +1188,12 @@
                 [23, 25], [25, 27], [24, 26], [26, 28]
             ];
 
+            const rect = getCameraDisplayRect(elements.poseCanvas);
+            const mapPoint = (p) => ({
+                x: rect.x + (1 - p.x) * rect.width,
+                y: rect.y + p.y * rect.height
+            });
+
             ctx.strokeStyle = '#D5EAF9';
             ctx.lineWidth = 3;
             ctx.shadowBlur = 12;
@@ -826,17 +1203,20 @@
                 const p1 = landmarks[i];
                 const p2 = landmarks[j];
                 if (p1 && p2 && p1.visibility > 0.4 && p2.visibility > 0.4) {
+                    const a = mapPoint(p1);
+                    const b = mapPoint(p2);
                     ctx.beginPath();
-                    ctx.moveTo((1 - p1.x) * w, p1.y * h);
-                    ctx.lineTo((1 - p2.x) * w, p2.y * h);
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
                     ctx.stroke();
                 }
             });
 
             landmarks.forEach((p) => {
                 if (p.visibility > 0.4) {
+                    const point = mapPoint(p);
                     ctx.beginPath();
-                    ctx.arc((1 - p.x) * w, p.y * h, 5, 0, Math.PI * 2);
+                    ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
                     ctx.fillStyle = '#F2D6F8';
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = '#F2D6F8';
@@ -921,29 +1301,60 @@
             const target = STICKMAN_POSES[state.currentPoseKey];
             if (!target) return;
 
+            const leftShoulder = landmarks[11];
+            const rightShoulder = landmarks[12];
             const leftWrist = landmarks[15];
             const rightWrist = landmarks[16];
             const nose = landmarks[0];
 
-            if (leftWrist && rightWrist && nose) {
-                const playerLeftX = (1 - leftWrist.x) - (1 - nose.x);
-                const playerLeftY = leftWrist.y - nose.y;
-                const playerRightX = (1 - rightWrist.x) - (1 - nose.x);
-                const playerRightY = rightWrist.y - nose.y;
-
-                const distLeft = Math.hypot(playerLeftX - target.leftHand.x * 0.45, playerLeftY - target.leftHand.y * 0.45);
-                const distRight = Math.hypot(playerRightX - target.rightHand.x * 0.45, playerRightY - target.rightHand.y * 0.45);
-
-                const totalDist = (distLeft + distRight) / 2;
-                let sync = Math.max(0, Math.min(100, Math.round((1 - totalDist) * 100)));
-                state.currentSyncPercent = sync;
+            const required = [leftShoulder, rightShoulder, leftWrist, rightWrist, nose];
+            if (required.some(p => !p || (p.visibility ?? 1) < 0.35)) {
+                state.currentSyncPercent = 0;
                 updateSyncUI();
+                return;
             }
+
+            // 영상은 좌우 반전되어 보이므로 화면 왼쪽/오른쪽 손을 기준으로 판정한다.
+            const screenLeftHand = rightWrist;
+            const screenRightHand = leftWrist;
+
+            const shoulderWidth = Math.max(
+                0.12,
+                Math.hypot(leftShoulder.x - rightShoulder.x, leftShoulder.y - rightShoulder.y)
+            );
+
+            const screenX = (p) => 1 - p.x;
+            const noseX = screenX(nose);
+            const noseY = nose.y;
+
+            const playerLeftX = (screenX(screenLeftHand) - noseX) / shoulderWidth;
+            const playerLeftY = (screenLeftHand.y - noseY) / shoulderWidth;
+            const playerRightX = (screenX(screenRightHand) - noseX) / shoulderWidth;
+            const playerRightY = (screenRightHand.y - noseY) / shoulderWidth;
+
+            const targetLeftX = target.leftHand.x * 0.9;
+            const targetLeftY = target.leftHand.y * 0.9;
+            const targetRightX = target.rightHand.x * 0.9;
+            const targetRightY = target.rightHand.y * 0.9;
+
+            const distLeft = Math.hypot(playerLeftX - targetLeftX, playerLeftY - targetLeftY);
+            const distRight = Math.hypot(playerRightX - targetRightX, playerRightY - targetRightY);
+            const totalDist = (distLeft + distRight) / 2;
+
+            state.currentSyncPercent = Math.max(
+                0,
+                Math.min(100, Math.round(100 * Math.exp(-1.15 * totalDist)))
+            );
+            updateSyncUI();
         }
 
         function updateSyncUI() {
-            elements.syncPercentText.innerText = `${state.currentSyncPercent}%`;
-            elements.syncBar.style.width = `${state.currentSyncPercent}%`;
+            if (elements.syncPercentText) {
+                elements.syncPercentText.innerText = `${state.currentSyncPercent}%`;
+            }
+            if (elements.syncBar) {
+                elements.syncBar.style.width = `${state.currentSyncPercent}%`;
+            }
         }
 
         function autoCorrelate(buf, sampleRate) {
@@ -983,6 +1394,81 @@
             return sampleRate / maxpos;
         }
 
+        // 보컬은 한 막대(노트)당 한 번만 판정한다.
+        // 판정 점수는 두 모드 공통: PERFECT 100 / GREAT 80 / GOOD 50 / BAD 20 / MISS 0.
+        function getJudgementFromAccuracy(accuracy) {
+            if (accuracy >= 90) return { name: 'PERFECT!', points: 100 };
+            if (accuracy >= 75) return { name: 'GREAT!', points: 80 };
+            if (accuracy >= 55) return { name: 'GOOD!', points: 50 };
+            if (accuracy >= 30) return { name: 'BAD!', points: 20 };
+            return { name: 'MISS!', points: 0 };
+        }
+
+        function getVocalJudgementFromPitchDiff(diff) {
+            if (!Number.isFinite(diff) || diff < 0) return { name: 'MISS!', points: 0 };
+            if (diff <= 15) return { name: 'PERFECT!', points: 100 };
+            if (diff <= 35) return { name: 'GREAT!', points: 80 };
+            if (diff <= 60) return { name: 'GOOD!', points: 50 };
+            if (diff <= 90) return { name: 'BAD!', points: 20 };
+            return { name: 'MISS!', points: 0 };
+        }
+
+        function judgePerformance(judgement) {
+            state.totalNotes++;
+
+            const judgementKey = judgement.name.replace('!', '');
+            if (state.judgementCounts[judgementKey] !== undefined) {
+                state.judgementCounts[judgementKey]++;
+            }
+            if (judgement.name === 'PERFECT!') state.perfects++;
+            else if (judgement.name === 'GREAT!') state.greats++;
+            else if (judgement.name === 'GOOD!') state.goods++;
+            else if (judgement.name === 'BAD!') state.bads++;
+            else state.misses++;
+
+            if (judgement.points > 0) {
+                state.combo++;
+                if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+            } else {
+                state.combo = 0;
+            }
+
+            // 판정 점수 자체는 모든 모드에서 동일한 고정값을 사용한다.
+            state.score += judgement.points;
+
+            elements.hudScore.innerText = state.score.toLocaleString('en-US', { minimumIntegerDigits: 6 });
+            elements.hudMultiplier.innerText = 'x1.0';
+            elements.hudCombo.innerText = state.combo;
+            elements.comboProgress.style.width = `${Math.min(100, (state.combo % 10) * 10)}%`;
+
+            triggerHitFeedback(judgement.name, judgement.points);
+        }
+
+        function frequencyToNoteName(hz) {
+            if (!Number.isFinite(hz) || hz <= 0) return '--';
+            const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const midi = Math.round(69 + 12 * Math.log2(hz / 440));
+            const octave = Math.floor(midi / 12) - 1;
+            return `${noteNames[((midi % 12) + 12) % 12]}${octave}`;
+        }
+
+        function getVocalBarColor(judgementName, alpha = 1) {
+            const colors = {
+                PERFECT: '#87CEFA', // 하늘색
+                GREAT: '#90EE90',   // 연두색
+                GOOD: '#FFD84D',    // 노란색
+                BAD: '#FF5C5C',     // 빨간색
+                MISS: '#808080'     // 회색
+            };
+            const hex = colors[judgementName.replace('!', '')] || colors.MISS;
+            if (alpha >= 1) return hex;
+            const value = hex.slice(1);
+            const r = parseInt(value.slice(0, 2), 16);
+            const g = parseInt(value.slice(2, 4), 16);
+            const b = parseInt(value.slice(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         function renderPitchGraph() {
             if (state.mode !== 'vocal' || !state.isPlaying) return;
 
@@ -993,101 +1479,279 @@
 
             const w = canvas.width;
             const h = canvas.height;
+            const songNotes = state.selectedSong.notes;
+            const barCount = songNotes.length;
+            const barDuration = state.selectedSong.duration / barCount;
+            const elapsed = Math.max(0, (performance.now() - state.stageStartMs) / 1000);
+            const songElapsed = Math.min(state.selectedSong.duration, elapsed);
 
-            ctx.clearRect(0, 0, w, h);
-
+            // 현재 사용자의 실제/시뮬레이션 음정
             if (state.micAnalyser && !state.useSimulatedMic) {
                 const buf = new Float32Array(2048);
                 state.micAnalyser.getFloatTimeDomainData(buf);
                 const pitch = autoCorrelate(buf, synth.ctx.sampleRate);
-                if (pitch > 0) state.currentPitchHz = pitch;
+                state.currentPitchHz = pitch > 0 ? pitch : 0;
             } else {
-                const target = state.targetPitchHz || 320;
-                state.currentPitchHz = target + (Math.sin(Date.now() / 180) * 20);
+                const currentIdx = Math.min(barCount - 1, Math.floor(songElapsed / barDuration));
+                const target = songNotes[currentIdx] || 320;
+                state.currentPitchHz = target + (Math.sin(performance.now() / 180) * 20);
             }
 
-            const songNotes = state.selectedSong.notes;
-            const noteIdx = Math.floor((state.currentTime / state.selectedSong.duration) * songNotes.length) % songNotes.length;
-            state.targetPitchHz = songNotes[noteIdx];
+            const currentBarIndex = Math.min(barCount - 1, Math.floor(songElapsed / barDuration));
+            state.targetPitchHz = songNotes[currentBarIndex] || 320;
 
-            elements.pitchFreqDisplay.innerText = state.currentPitchHz > 0 
-                ? `${Math.round(state.currentPitchHz)} Hz` 
-                : "--- Hz";
+            elements.pitchFreqDisplay.innerText = state.currentPitchHz > 0
+                ? `${frequencyToNoteName(state.currentPitchHz)} · ${Math.round(state.currentPitchHz)} Hz`
+                : '---';
 
-            const midY = h / 2;
-            const targetY = midY - ((state.targetPitchHz - 350) * 0.75);
+            ctx.clearRect(0, 0, w, h);
 
-            ctx.strokeStyle = 'rgba(100, 136, 177, 0.2)';
+            // 배경 가이드 라인
+            ctx.strokeStyle = 'rgba(100, 136, 177, 0.18)';
             ctx.lineWidth = 1;
-            for (let y = 20; y < h; y += 30) {
+            for (let y = 30; y < h - 20; y += 30) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(w, y);
                 ctx.stroke();
             }
 
-            ctx.fillStyle = 'rgba(213, 234, 249, 0.25)';
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#D5EAF9';
-            ctx.fillRect(w * 0.25, targetY - 10, w * 0.5, 20);
-            ctx.strokeStyle = '#D5EAF9';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(w * 0.25, targetY - 10, w * 0.5, 20);
+            const pitchToY = (hz) => {
+                const minHz = 220;
+                const maxHz = 760;
+                const normalized = Math.max(0, Math.min(1, (hz - minHz) / (maxHz - minHz)));
+                return (h - 50) - normalized * (h - 80);
+            };
 
-            const userY = midY - ((state.currentPitchHz - 350) * 0.75);
-            const clampedUserY = Math.max(15, Math.min(h - 15, userY));
+            // 기준 막대는 왼쪽에서 오른쪽으로 이동한다.
+            const barWidth = Math.max(110, Math.min(210, w / 4.5));
+            const travelWidth = w + barWidth;
+            const judgeX = w * 0.72;
+            const barHeight = 28;
 
-            ctx.beginPath();
-            ctx.arc(w * 0.5, clampedUserY, 10, 0, Math.PI * 2);
-            ctx.fillStyle = '#F2D6F8';
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = '#F2D6F8';
-            ctx.fill();
+            // 먼저 기준 음 막대를 그린다.
+            for (let i = 0; i < barCount; i++) {
+                const barStart = i * barDuration;
+                const x = -barWidth + ((barStart + barDuration - songElapsed) / state.selectedSong.duration) * travelWidth;
+                const y = pitchToY(songNotes[i]) - barHeight / 2;
+                if (x + barWidth < -20 || x > w + 20) continue;
 
-            const pitchDiff = Math.abs(state.currentPitchHz - state.targetPitchHz);
-            if (pitchDiff < 25) {
-                triggerHitFeedback('PERFECT!', '#D5EAF9');
-                addScore(100);
-            } else if (pitchDiff < 55) {
-                triggerHitFeedback('GREAT!', '#F2D6F8');
-                addScore(50);
+                const passed = i < currentBarIndex;
+                const active = i === currentBarIndex;
+                const targetNote = frequencyToNoteName(songNotes[i]);
+
+                // 이미 판정된 막대는 실제 판정 색으로, 아직 판정되지 않은 막대는 중립색으로 표시.
+                let fill = 'rgba(213, 234, 249, 0.24)';
+                let stroke = 'rgba(213, 234, 249, 0.62)';
+                if (passed && state.vocalJudgementColors && state.vocalJudgementColors[i]) {
+                    const judgementName = state.vocalJudgementColors[i];
+                    fill = getVocalBarColor(judgementName, 0.62);
+                    stroke = getVocalBarColor(judgementName, 1);
+                } else if (active) {
+                    fill = 'rgba(213, 234, 249, 0.45)';
+                    stroke = '#D5EAF9';
+                }
+
+                ctx.fillStyle = fill;
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = active ? 3 : 1.5;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, barHeight, 9);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = active || passed ? '#09111B' : '#D5EAF9';
+                ctx.font = '700 13px "Space Grotesk"';
+                ctx.fillText(targetNote, x + 10, y + 18);
             }
+
+            // 판정선: 현재 노래 진행 위치.
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(judgeX, 16);
+            ctx.lineTo(judgeX, h - 16);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '700 10px "Space Grotesk"';
+            ctx.fillText('VOICE', judgeX - 20, 12);
+
+            // 현재 사용자의 음역도 같은 시간축 위치에 막대로 표시한다.
+            // 기준 음과의 차이가 실시간으로 색에 반영되어 위/아래로 얼마나 벗어났는지 즉시 보인다.
+            if (state.currentPitchHz > 0) {
+                const userY = pitchToY(state.currentPitchHz);
+                const currentTargetY = pitchToY(state.targetPitchHz);
+                const pitchDiff = Math.abs(state.currentPitchHz - state.targetPitchHz);
+                const liveJudgement = getVocalJudgementFromPitchDiff(pitchDiff);
+                const liveColor = getVocalBarColor(liveJudgement.name, 1);
+                const userBarWidth = Math.max(72, Math.min(130, barWidth * 0.62));
+                const userBarX = judgeX - userBarWidth / 2;
+
+                // 목표 막대와의 수직 거리도 함께 강조
+                ctx.strokeStyle = getVocalBarColor(liveJudgement.name, 0.35);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(judgeX, currentTargetY);
+                ctx.lineTo(judgeX, userY);
+                ctx.stroke();
+
+                ctx.fillStyle = getVocalBarColor(liveJudgement.name, 0.82);
+                ctx.strokeStyle = liveColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(userBarX, userY - 9, userBarWidth, 18, 7);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#111111';
+                ctx.font = '700 11px "Space Grotesk"';
+                ctx.fillText(frequencyToNoteName(state.currentPitchHz), userBarX + 8, userY + 4);
+            }
+
+            // 막대 하나당 한 번만 판정하고, 판정 결과 색상을 해당 기준 막대에 저장한다.
+            if (state.vocalBarIndex !== currentBarIndex) {
+                if (state.vocalBarIndex >= 0 && state.vocalBarPitchDiffs.length) {
+                    const avgDiff = state.vocalBarPitchDiffs.reduce((a, b) => a + b, 0) / state.vocalBarPitchDiffs.length;
+                    const judgement = getVocalJudgementFromPitchDiff(avgDiff);
+                    if (!state.vocalJudgementColors) state.vocalJudgementColors = {};
+                    state.vocalJudgementColors[state.vocalBarIndex] = judgement.name;
+                    judgePerformance(judgement);
+                }
+                state.vocalBarIndex = currentBarIndex;
+                state.vocalBarPitchDiffs = [];
+            }
+
+            const pitchDiff = state.currentPitchHz > 0
+                ? Math.abs(state.currentPitchHz - state.targetPitchHz)
+                : Infinity;
+            if (Number.isFinite(pitchDiff)) {
+                state.vocalBarPitchDiffs.push(pitchDiff);
+            }
+        }
+
+        function albumArtSvg(song, index) {
+            const palettes = [
+                ['#dff9ff','#49b7ef','#1768bd'],
+                ['#c9f1ff','#7bc8ff','#2f75c5'],
+                ['#e7faff','#55c4e8','#2458a6'],
+                ['#d5f6ff','#5da9ef','#164f9e'],
+                ['#effcff','#39a9d7','#315fae']
+            ];
+            const [a,b,c] = palettes[index % palettes.length];
+            const safeTitle = song.title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const safeArtist = song.artist.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            return `<svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${safeTitle} album art">
+                <defs>
+                    <linearGradient id="g${song.id}" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="${a}"/><stop offset=".52" stop-color="${b}"/><stop offset="1" stop-color="${c}"/>
+                    </linearGradient>
+                    <filter id="blur${song.id}"><feGaussianBlur stdDeviation="34"/></filter>
+                </defs>
+                <rect width="800" height="800" fill="url(#g${song.id})"/>
+                <circle cx="620" cy="170" r="190" fill="#fff" opacity=".22" filter="url(#blur${song.id})"/>
+                <circle cx="160" cy="650" r="230" fill="#fff" opacity=".18" filter="url(#blur${song.id})"/>
+                <path d="M0 570 C180 430 310 720 480 530 S700 410 800 500 V800 H0Z" fill="#fff" opacity=".16"/>
+                <g fill="none" stroke="#fff" opacity=".52">
+                    <circle cx="400" cy="370" r="170" stroke-width="3"/>
+                    <circle cx="400" cy="370" r="120" stroke-width="2"/>
+                    <circle cx="400" cy="370" r="70" stroke-width="1.5"/>
+                </g>
+                <text x="56" y="92" fill="#fff" font-family="Space Grotesk,Arial" font-size="25" font-weight="700" letter-spacing="5">NEO-STAGE 2099</text>
+                <text x="56" y="660" fill="#fff" font-family="Space Grotesk,Arial" font-size="52" font-weight="900">${safeTitle}</text>
+                <text x="58" y="700" fill="#fff" opacity=".9" font-family="Noto Sans KR,Arial" font-size="20">${safeArtist}</text>
+                <text x="58" y="752" fill="#fff" opacity=".82" font-family="Space Grotesk,Arial" font-size="16" letter-spacing="4">${song.genre.toUpperCase()}</text>
+            </svg>`;
+        }
+
+        let songWheelIndex = 0;
+        let songWheelLock = false;
+
+        function applySongStack(direction = 0) {
+            const cards = Array.from(elements.songGrid.querySelectorAll('.song-card'));
+            cards.forEach((card, index) => {
+                card.classList.remove('stack-front','stack-back-1','stack-back-2','stack-back-3','stack-hidden','stack-next','stack-next-2','stack-next-3','stack-forward','stack-backward');
+                const offset = index - songWheelIndex;
+                if (offset === 0) card.classList.add('stack-front');
+                else if (offset === -1) card.classList.add('stack-back-1');
+                else if (offset === -2) card.classList.add('stack-back-2');
+                else if (offset === -3) card.classList.add('stack-back-3');
+                else if (offset === 1) card.classList.add('stack-next');
+                else if (offset === 2) card.classList.add('stack-next-2');
+                else if (offset === 3) card.classList.add('stack-next-3');
+                else card.classList.add('stack-hidden');
+                if (direction > 0 && offset === 0) card.classList.add('stack-forward');
+                if (direction < 0 && offset === 0) card.classList.add('stack-backward');
+                card.classList.toggle('song-selected', offset === 0);
+            });
         }
 
         function renderSongGrid() {
             const currentSongList = state.mode === 'dance' ? DANCE_SONGS : VOCAL_SONGS;
-            
-            // 모드에 맞춰 현재 선택 곡 자동 갱신
+
             if (!currentSongList.some(s => s.id === state.selectedSong.id)) {
                 state.selectedSong = currentSongList[0];
             }
+            songWheelIndex = Math.max(0, currentSongList.findIndex(s => s.id === state.selectedSong.id));
 
-            elements.songGrid.innerHTML = currentSongList.map((song) => `
-                <div data-songid="${song.id}" class="song-card pastel-glass p-5 rounded-3xl border ${state.selectedSong.id === song.id ? 'border-[#D5EAF9] shadow-pastel-ice bg-[#D5EAF9]/10' : 'border-[#6488B1]/20'} hover:border-[#D5EAF9] transition-all cursor-pointer flex flex-col justify-between">
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-space text-[#D5EAF9] px-2.5 py-1 bg-[#D5EAF9]/10 rounded-full border border-[#D5EAF9]/20 uppercase">${song.genre}</span>
-                            <span class="text-xs font-space text-[#F2D6F8] font-bold">${song.difficulty}</span>
-                        </div>
-                        <h3 class="font-space font-bold text-lg text-[#D5EAF9] tracking-wide">${song.title}</h3>
-                        <p class="text-xs text-[#6488B1] font-noto font-light">${song.artist}</p>
+            elements.songGrid.innerHTML = currentSongList.map((song, index) => `
+                <article data-songid="${song.id}" class="song-card ${state.selectedSong.id === song.id ? 'song-selected' : ''}">
+                    <div class="flex items-center justify-between mb-7">
+                        <div class="song-index">${String(index + 1).padStart(2,'0')}</div>
+                        <span class="px-3 py-1.5 rounded-full bg-white/65 border border-[#3c8fca]/20 text-[10px] font-space text-[#1768a0] tracking-wide">${song.genre}</span>
                     </div>
-                    <div class="mt-4 flex justify-between items-center text-xs text-[#6488B1] font-space pt-3 border-t border-[#6488B1]/20">
-                        <span><i data-lucide="clock" class="inline w-3.5 h-3.5 mr-1 text-[#D5EAF9]"></i>${song.duration}s</span>
-                        <span><i data-lucide="activity" class="inline w-3.5 h-3.5 mr-1 text-[#F2D6F8]"></i>${song.bpm} BPM</span>
+                    <div>
+                        <div class="text-[11px] font-space font-bold text-[#2b78aa] tracking-[.2em] mb-2">TRACK ${String(index + 1).padStart(2,'0')}</div>
+                        <h3 class="font-space font-black text-3xl md:text-5xl tracking-tight">${song.title}</h3>
+                        <p class="text-sm md:text-base font-noto mt-2">${song.artist}</p>
                     </div>
-                </div>
+                    <div class="mt-8 pt-5 border-t border-[#2879ac]/15 flex items-center justify-between text-sm font-space text-[#2873a5]">
+                        <span>${song.duration}s</span>
+                        <span>${song.bpm} BPM</span>
+                    </div>
+                </article>
             `).join('');
 
-            document.querySelectorAll('.song-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const id = card.getAttribute('data-songid');
-                    state.selectedSong = currentSongList.find(s => s.id === id);
-                    renderSongGrid();
-                });
+            document.querySelectorAll('.song-card').forEach((card, index) => {
+                card.addEventListener('click', () => selectSongByIndex(index));
             });
 
+            applySongStack();
+            updateSongDetail();
             if (window.lucide) lucide.createIcons();
+        }
+
+        function selectSongByIndex(index, direction = 0) {
+            const currentSongList = state.mode === 'dance' ? DANCE_SONGS : VOCAL_SONGS;
+            if (!currentSongList[index]) return;
+            const previousIndex = songWheelIndex;
+            songWheelIndex = index;
+            state.selectedSong = currentSongList[index];
+            applySongStack(direction || Math.sign(index - previousIndex));
+            updateSongDetail();
+        }
+
+        function updateSongDetail() {
+            const song = state.selectedSong;
+            const index = Math.max(0, (state.mode === 'dance' ? DANCE_SONGS : VOCAL_SONGS).findIndex(s => s.id === song.id));
+            elements.selectedSongTitle.innerText = song.title;
+            elements.selectedSongBpm.innerText = `${song.bpm} BPM`;
+            elements.albumArt.innerHTML = albumArtSvg(song, index);
+            elements.difficultyLabel.innerText = state.selectedDifficulty;
+            elements.difficultyButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.difficulty === state.selectedDifficulty));
+        }
+
+        function moveSongByWheel(deltaY) {
+            if (songWheelLock) return;
+            const dir = deltaY > 0 ? 1 : -1;
+            const currentSongList = state.mode === 'dance' ? DANCE_SONGS : VOCAL_SONGS;
+            const nextIndex = Math.min(currentSongList.length - 1, Math.max(0, songWheelIndex + dir));
+            if (nextIndex === songWheelIndex) return;
+
+            songWheelLock = true;
+            selectSongByIndex(nextIndex, dir);
+            setTimeout(() => { songWheelLock = false; }, 420);
         }
 
         let hitTimeout = null;
@@ -1103,22 +1767,6 @@
             }, 300);
         }
 
-        function addScore(basePts) {
-            state.combo++;
-            state.totalNotes++;
-            if (basePts >= 100) state.perfects++;
-            else state.greats++;
-
-            if (state.combo > state.maxCombo) state.maxCombo = state.combo;
-
-            state.multiplier = 1.0 + Math.floor(state.combo / 10) * 0.2;
-            state.score += Math.round(basePts * state.multiplier);
-
-            elements.hudScore.innerText = state.score.toLocaleString('en-US', { minimumIntegerDigits: 6 });
-            elements.hudMultiplier.innerText = `x${state.multiplier.toFixed(1)}`;
-            elements.hudCombo.innerText = state.combo;
-            elements.comboProgress.style.width = `${Math.min(100, (state.combo % 10) * 10)}%`;
-        }
 
         function switchStep(step) {
             state.currentStep = step;
@@ -1137,11 +1785,11 @@
                 elements.viewSongSelect.classList.remove('hidden');
                 
                 if (state.mode === 'dance') {
-                    elements.badgeCategory.innerText = "DANCE TRAINING // SELECT TRACK";
-                    elements.titleSongSelect.innerText = "댄스 트레이닝 곡 선택";
+                    elements.badgeCategory.innerText = "DANCE TRAINING";
+                    elements.titleSongSelect.innerText = "Music Selection";
                 } else {
-                    elements.badgeCategory.innerText = "VOCAL TRAINING // SELECT TRACK";
-                    elements.titleSongSelect.innerText = "보컬 트레이닝 곡 선택";
+                    elements.badgeCategory.innerText = "VOCAL TRAINING";
+                    elements.titleSongSelect.innerText = "Music Selection";
                 }
                 renderSongGrid();
             } else if (step === 3) {
@@ -1152,6 +1800,11 @@
 
         function startGame() {
             switchStep(3);
+
+            if (state.mode === 'dance' && (!state.cameraActive || !poseDetector)) {
+                setPoseStatus('POSE: CAMERA NOT READY', 'error');
+                showPoseError('웹캠/포즈 인식이 준비되지 않았습니다. 브라우저에서 카메라 권한을 허용한 뒤 다시 시작해 주세요.');
+            }
             
             state.isPlaying = true;
             state.score = 0;
@@ -1159,15 +1812,25 @@
             state.maxCombo = 0;
             state.perfects = 0;
             state.greats = 0;
+            state.goods = 0;
+            state.bads = 0;
+            state.misses = 0;
+            state.judgementCounts = { PERFECT: 0, GREAT: 0, GOOD: 0, BAD: 0, MISS: 0 };
             state.totalNotes = 0;
             state.currentTime = 0;
+            state.poseCueTimer = 0;
+            state.lastJudgedDancePose = -1;
+            state.vocalBarIndex = -1;
+            state.vocalBarPitchDiffs = [];
+            state.vocalJudgementColors = {};
+            state.stageStartMs = performance.now();
             
             if (state.mode === 'dance') {
                 state.currentPoseKey = state.selectedSong.poses[0] || 'T_POSE';
             }
 
             elements.hudTrackTitle.innerText = state.selectedSong.title;
-            elements.hudTrackGenre.innerText = state.selectedSong.genre;
+            elements.hudTrackGenre.innerText = `${state.selectedSong.genre} // ${state.selectedDifficulty.toUpperCase()}`;
             elements.hudTimeTotal.innerText = `0:${state.selectedSong.duration < 10 ? '0' : ''}${state.selectedSong.duration}`;
 
             if (state.mode === 'dance') {
@@ -1226,17 +1889,26 @@
 
                 renderTargetStickman();
 
-                if (state.currentSyncPercent >= 80) {
-                    triggerHitFeedback('PERFECT!', '#D5EAF9');
-                    addScore(100);
-                } else if (state.currentSyncPercent >= 50) {
-                    triggerHitFeedback('GREAT!', '#F2D6F8');
-                    addScore(50);
-                }
+                const judgement = getJudgementFromAccuracy(state.currentSyncPercent);
+                judgePerformance(judgement);
             }
         }
 
         function endGame() {
+            if (state.mode === 'dance') {
+                setPoseStatus('POSE: GAME ENDED', 'info');
+            }
+
+            // 마지막 보컬 막대도 종료 시 한 번만 판정한다.
+            if (state.mode === 'vocal' && state.vocalBarPitchDiffs.length) {
+                const avgDiff = state.vocalBarPitchDiffs.reduce((a, b) => a + b, 0) / state.vocalBarPitchDiffs.length;
+                const judgement = getVocalJudgementFromPitchDiff(avgDiff);
+                if (!state.vocalJudgementColors) state.vocalJudgementColors = {};
+                if (state.vocalBarIndex >= 0) state.vocalJudgementColors[state.vocalBarIndex] = judgement.name;
+                judgePerformance(judgement);
+                state.vocalBarPitchDiffs = [];
+            }
+
             state.isPlaying = false;
             synth.stopTrack();
             clearInterval(state.songTimer);
@@ -1244,17 +1916,45 @@
             elements.viewStage.classList.add('hidden');
             elements.viewResult.classList.remove('hidden');
 
-            let rank = 'S+';
-            const acc = state.totalNotes > 0 ? (state.perfects / state.totalNotes) * 100 : 95;
-            if (acc < 70) rank = 'B';
-            else if (acc < 85) rank = 'A';
-            else if (acc < 92) rank = 'S';
+            const acc = state.totalNotes > 0
+                ? (state.score / (state.totalNotes * 100)) * 100
+                : 0;
+
+            // 최종 등급은 각 판정의 비율을 비교해 가장 높은 판정으로 결정한다.
+            // PERFECT 비율이 가장 높으면 A, GREAT는 B, GOOD은 C,
+            // BAD는 D, MISS는 F가 된다.
+            // 단, 기존의 A+ 판정(모든 노트 PERFECT 풀콤보)은 그대로 유지한다.
+            const isFullCombo =
+                state.totalNotes > 0 &&
+                state.misses === 0 &&
+                state.maxCombo === state.totalNotes;
+
+            let rank;
+            if (isFullCombo && state.perfects === state.totalNotes) {
+                rank = 'A+';
+            } else {
+                const judgementCounts = {
+                    A: state.judgementCounts.PERFECT,
+                    B: state.judgementCounts.GREAT,
+                    C: state.judgementCounts.GOOD,
+                    D: state.judgementCounts.BAD,
+                    F: state.judgementCounts.MISS
+                };
+
+                rank = Object.entries(judgementCounts)
+                    .reduce((best, current) => {
+                        return current[1] > best[1] ? current : best;
+                    }, ['F', 0])[0];
+            }
 
             elements.resultRank.innerText = rank;
             elements.resultFinalScore.innerText = state.score.toLocaleString();
             elements.resultMaxCombo.innerText = state.maxCombo;
-            elements.resultPerfect.innerText = state.perfects;
-            elements.resultGreat.innerText = state.greats;
+            elements.resultPerfect.innerText = state.judgementCounts.PERFECT;
+            elements.resultGreat.innerText = state.judgementCounts.GREAT;
+            elements.resultGood.innerText = state.judgementCounts.GOOD;
+            elements.resultBad.innerText = state.judgementCounts.BAD;
+            elements.resultMiss.innerText = state.judgementCounts.MISS;
             elements.resultAccuracy.innerText = `${acc.toFixed(1)}%`;
 
             if (window.confetti) {
@@ -1271,7 +1971,7 @@
             initBgCanvas();
 
             // 백그라운드 오디오/하드웨어 센서 초기화 (시작 오버레이 없이 자동 준비)
-            synth.init();
+            try { synth.init(); } catch (err) { console.warn('Audio init:', err); }
             setupCamera();
             setupMicrophone();
 
@@ -1303,6 +2003,20 @@
                 switchStep(2);
             });
 
+            // 곡 선택: 마우스 휠 한 번 = 한 장 넘김
+            elements.songGrid.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                moveSongByWheel(event.deltaY);
+            }, { passive: false });
+
+            // 난이도 선택
+            elements.difficultyButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.selectedDifficulty = btn.dataset.difficulty;
+                    updateSongDetail();
+                });
+            });
+
             // Step 2 게임 시작 버튼
             elements.btnStartGame.addEventListener('click', startGame);
 
@@ -1312,16 +2026,26 @@
                 switchStep(2);
             });
 
-            // 하드웨어 토글 버튼
-            elements.toggleCamBtn.addEventListener('click', () => {
-                state.useSimulatedCam = !state.useSimulatedCam;
-                elements.camStatusText.innerText = state.useSimulatedCam ? "CAM: SIMULATED" : "CAM: LIVE";
-            });
+            // 하드웨어 토글 버튼 (UI가 없는 경우에도 앱 전체가 멈추지 않도록 null-safe)
+            if (elements.toggleCamBtn) {
+                elements.toggleCamBtn.addEventListener('click', async () => {
+                    if (state.useSimulatedCam) {
+                        await setupCamera();
+                    } else {
+                        state.useSimulatedCam = true;
+                        setPoseStatus('POSE: SIMULATED', 'warn');
+                    }
+                });
+            }
 
-            elements.toggleMicBtn.addEventListener('click', () => {
-                state.useSimulatedMic = !state.useSimulatedMic;
-                elements.micStatusText.innerText = state.useSimulatedMic ? "MIC: SIMULATED" : "MIC: ACTIVE";
-            });
+            if (elements.toggleMicBtn) {
+                elements.toggleMicBtn.addEventListener('click', () => {
+                    state.useSimulatedMic = !state.useSimulatedMic;
+                    if (elements.micStatusText) {
+                        elements.micStatusText.innerText = state.useSimulatedMic ? "MIC: SIMULATED" : "MIC: ACTIVE";
+                    }
+                });
+            }
 
             if (window.lucide) lucide.createIcons();
 
