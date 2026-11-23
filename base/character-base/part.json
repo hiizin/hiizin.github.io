@@ -1,0 +1,586 @@
+{
+  "id": "character-base",
+  "slot": "base",
+  "name": "기본 바디",
+  "version": 2,
+  "rig": {
+    "canvas": {
+      "width": 1092,
+      "height": 1163
+    },
+    "torsoAnchor": {
+      "x": 546.0,
+      "y": 678.9
+    },
+    "headPivot": {
+      "x": 546.0,
+      "y": 354.1
+    },
+    "gazeOrigin": {
+      "x": 546.0,
+      "y": 256.2
+    },
+    "breath": {
+      "period": 4.8,
+      "headLift": 5.9,
+      "torsoLift": 2.6,
+      "scaleX": 0.007,
+      "scaleY": 0.0095
+    },
+    "springArm": 215,
+    "gazeLimit": {
+      "kx": 0.55,
+      "ky": 0.6,
+      "x": 3.0,
+      "up": -1.6,
+      "down": 0.0,
+      "lift": 0.3
+    },
+    "arms": {
+      "R": {
+        "shoulder": [
+          427.1,
+          434.3
+        ],
+        "elbow": [
+          371.6,
+          748.2
+        ],
+        "wrist": [
+          308.8,
+          921.3
+        ],
+        "tip": [
+          306.6,
+          1069.5
+        ]
+      },
+      "L": {
+        "shoulder": [
+          663.5,
+          434.3
+        ],
+        "elbow": [
+          719.0,
+          748.2
+        ],
+        "wrist": [
+          781.8,
+          921.3
+        ],
+        "tip": [
+          784.0,
+          1069.5
+        ]
+      },
+      "bend": {
+        "R": 1,
+        "L": -1
+      },
+      "followFade": [
+        642,
+        762
+      ]
+    },
+    "poses": {
+      "rest": {
+        "R": {
+          "target": [
+            308.8,
+            921.3
+          ],
+          "handDir": null,
+          "depth": "back"
+        },
+        "L": {
+          "target": [
+            781.8,
+            921.3
+          ],
+          "handDir": null,
+          "depth": "back"
+        }
+      },
+      "hipR": {
+        "R": {
+          "target": [
+            446.8,
+            765.0
+          ],
+          "handDir": 112,
+          "depth": "front",
+          "lowerScale": 1.0,
+          "handScale": 0.86,
+          "handDepth": "hip",
+          "cap": true
+        },
+        "L": {
+          "target": [
+            781.8,
+            921.3
+          ],
+          "handDir": null,
+          "depth": "back"
+        },
+        "group": "oneHip"
+      },
+      "hipL": {
+        "R": {
+          "target": [
+            308.8,
+            921.3
+          ],
+          "handDir": null,
+          "depth": "back"
+        },
+        "L": {
+          "target": [
+            643.8,
+            765.0
+          ],
+          "handDir": 68,
+          "depth": "front",
+          "lowerScale": 1.0,
+          "handScale": 0.86,
+          "handDepth": "hip",
+          "cap": true
+        },
+        "group": "oneHip"
+      },
+      "hipBoth": {
+        "R": {
+          "target": [
+            446.8,
+            765.0
+          ],
+          "handDir": 112,
+          "depth": "front",
+          "lowerScale": 1.0,
+          "handScale": 0.86,
+          "handDepth": "hip",
+          "cap": true
+        },
+        "L": {
+          "target": [
+            643.8,
+            765.0
+          ],
+          "handDir": 68,
+          "depth": "front",
+          "lowerScale": 1.0,
+          "handScale": 0.86,
+          "handDepth": "hip",
+          "cap": true
+        }
+      },
+      "cross": {
+        "R": {
+          "target": [
+            619.0,
+            658.5
+          ],
+          "handDir": -38,
+          "depth": "front",
+          "upperScale": 0.8,
+          "lowerScale": 0.95,
+          "handScale": 0.92,
+          "handDepth": "tuck"
+        },
+        "L": {
+          "target": [
+            471.6,
+            692.1
+          ],
+          "handDir": 218,
+          "depth": "front",
+          "upperScale": 0.8,
+          "lowerScale": 0.95,
+          "handScale": 0.92
+        }
+      }
+    },
+    "posePool": [
+      "hipR",
+      "hipL",
+      "hipBoth",
+      "cross"
+    ],
+    "startPose": "hipR",
+    "poseIdle": 8,
+    "poseTime": 0.75,
+    "blink": {
+      "interval": [
+        2.4,
+        5.5
+      ],
+      "double": 0.18
+    }
+  },
+  "layers": [
+    {
+      "key": "armUpperR",
+      "src": "armUpperR.webp",
+      "x": 347,
+      "y": 401,
+      "w": 120,
+      "h": 366,
+      "z": 30,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "upper"
+      }
+    },
+    {
+      "key": "armLowerR",
+      "src": "armLowerR.webp",
+      "x": 296,
+      "y": 672,
+      "w": 113,
+      "h": 262,
+      "z": 31,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "lower",
+        "depth": "back"
+      }
+    },
+    {
+      "key": "handR",
+      "src": "handR.webp",
+      "x": 197,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 32,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "hand",
+        "depth": "back"
+      }
+    },
+    {
+      "key": "armUpperL",
+      "src": "armUpperL.webp",
+      "x": 625,
+      "y": 401,
+      "w": 120,
+      "h": 366,
+      "z": 36,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "upper"
+      }
+    },
+    {
+      "key": "armLowerL",
+      "src": "armLowerL.webp",
+      "x": 683,
+      "y": 672,
+      "w": 113,
+      "h": 262,
+      "z": 37,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "lower",
+        "depth": "back"
+      }
+    },
+    {
+      "key": "handL",
+      "src": "handL.webp",
+      "x": 755,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 38,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "hand",
+        "depth": "back"
+      }
+    },
+    {
+      "key": "handRTuck",
+      "src": "handR.webp",
+      "x": 197,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 35,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "hand",
+        "depth": "tuck"
+      }
+    },
+    {
+      "key": "legs",
+      "src": "legs.webp",
+      "x": 370,
+      "y": 724,
+      "w": 352,
+      "h": 439,
+      "z": 60,
+      "bind": {
+        "type": "static"
+      }
+    },
+    {
+      "key": "waist",
+      "src": "waist.webp",
+      "x": 423,
+      "y": 572,
+      "w": 246,
+      "h": 229,
+      "z": 62,
+      "bind": {
+        "type": "torsoWarp",
+        "fadeY": [
+          620,
+          745
+        ],
+        "mesh": {
+          "strip": true,
+          "ch": 6,
+          "m": 8
+        }
+      }
+    },
+    {
+      "key": "topBase",
+      "src": "topBase.webp",
+      "x": 418,
+      "y": 301,
+      "w": 256,
+      "h": 357,
+      "z": 64,
+      "bind": {
+        "type": "neck",
+        "blendY": [
+          339,
+          376
+        ],
+        "mesh": {
+          "strip": true,
+          "ch": 6,
+          "m": 8
+        }
+      }
+    },
+    {
+      "key": "armLowerRFront",
+      "src": "armLowerRoundR.webp",
+      "x": 296,
+      "y": 672,
+      "w": 113,
+      "h": 262,
+      "z": 92,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "lower",
+        "depth": "front"
+      }
+    },
+    {
+      "key": "armUpperRCap",
+      "src": "armUpperR.webp",
+      "x": 347,
+      "y": 401,
+      "w": 120,
+      "h": 366,
+      "z": 93,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "upper",
+        "depth": "front",
+        "capFrom": 0.62,
+        "when": "cap"
+      }
+    },
+    {
+      "key": "handRFront",
+      "src": "handR.webp",
+      "x": 197,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 94,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "hand",
+        "depth": "front"
+      }
+    },
+    {
+      "key": "armLowerLFront",
+      "src": "armLowerRoundL.webp",
+      "x": 683,
+      "y": 672,
+      "w": 113,
+      "h": 262,
+      "z": 96,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "lower",
+        "depth": "front"
+      }
+    },
+    {
+      "key": "armUpperLCap",
+      "src": "armUpperL.webp",
+      "x": 625,
+      "y": 401,
+      "w": 120,
+      "h": 366,
+      "z": 97,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "upper",
+        "depth": "front",
+        "capFrom": 0.62,
+        "when": "cap"
+      }
+    },
+    {
+      "key": "handLFront",
+      "src": "handL.webp",
+      "x": 755,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 98,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "hand",
+        "depth": "front"
+      }
+    },
+    {
+      "key": "handHipR",
+      "src": "handHipR.webp",
+      "x": 197,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 94,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "hand",
+        "depth": "hip"
+      }
+    },
+    {
+      "key": "handHipL",
+      "src": "handHipL.webp",
+      "x": 755,
+      "y": 910,
+      "w": 140,
+      "h": 164,
+      "z": 98,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "hand",
+        "depth": "hip"
+      }
+    },
+    {
+      "key": "face",
+      "src": "face.webp",
+      "x": 447,
+      "y": 161,
+      "w": 198,
+      "h": 192,
+      "z": 100,
+      "bind": {
+        "type": "head"
+      }
+    },
+    {
+      "key": "blushR",
+      "src": "blushR.webp",
+      "x": 549,
+      "y": 243,
+      "w": 106,
+      "h": 85,
+      "z": 101,
+      "bind": {
+        "type": "head"
+      }
+    },
+    {
+      "key": "blushL",
+      "src": "blushL.webp",
+      "x": 437,
+      "y": 243,
+      "w": 106,
+      "h": 85,
+      "z": 102,
+      "bind": {
+        "type": "head"
+      }
+    },
+    {
+      "key": "noseShade",
+      "src": "noseShade.webp",
+      "x": 540,
+      "y": 281,
+      "w": 15,
+      "h": 23,
+      "z": 103,
+      "bind": {
+        "type": "faceDetail"
+      }
+    },
+    {
+      "key": "noseLine",
+      "src": "noseLine.webp",
+      "x": 542,
+      "y": 295,
+      "w": 5,
+      "h": 4,
+      "z": 104,
+      "bind": {
+        "type": "faceDetail"
+      }
+    },
+    {
+      "key": "lip",
+      "src": "lip.webp",
+      "x": 539,
+      "y": 319,
+      "w": 13,
+      "h": 7,
+      "z": 105,
+      "bind": {
+        "type": "faceDetail"
+      }
+    },
+    {
+      "key": "mouth",
+      "src": "mouth.webp",
+      "x": 535,
+      "y": 313,
+      "w": 22,
+      "h": 7,
+      "z": 106,
+      "bind": {
+        "type": "faceDetail"
+      }
+    }
+  ]
+}

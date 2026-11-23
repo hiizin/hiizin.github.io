@@ -1,0 +1,190 @@
+{
+  "id": "hair-001",
+  "slot": "hair",
+  "name": "롱 트윈테일",
+  "version": 2,
+  "thumb": {
+    "crop": [
+      202,
+      1,
+      686,
+      686
+    ]
+  },
+  "tint": {
+    "hair": {
+      "label": "헤어 컬러",
+      "mode": "auto-hair",
+      "palette": [
+        {
+          "name": "기본",
+          "hsl": null,
+          "swatch": "#5a545a"
+        },
+        {
+          "name": "블루",
+          "hsl": [
+            210,
+            0.75,
+            0.2
+          ],
+          "swatch": "#4f9bff"
+        },
+        {
+          "name": "민트",
+          "hsl": [
+            165,
+            0.6,
+            0.25
+          ],
+          "swatch": "#59d6b4"
+        },
+        {
+          "name": "라벤더",
+          "hsl": [
+            265,
+            0.55,
+            0.28
+          ],
+          "swatch": "#a58bff"
+        },
+        {
+          "name": "핑크",
+          "hsl": [
+            330,
+            0.75,
+            0.25
+          ],
+          "swatch": "#ff6fb5"
+        },
+        {
+          "name": "블론드",
+          "hsl": [
+            45,
+            0.8,
+            0.3
+          ],
+          "swatch": "#f0cf6a"
+        },
+        {
+          "name": "레드",
+          "hsl": [
+            355,
+            0.8,
+            0.12
+          ],
+          "swatch": "#e04a5a"
+        },
+        {
+          "name": "실버",
+          "hsl": [
+            215,
+            0.06,
+            0.38
+          ],
+          "swatch": "#d4d9e2"
+        }
+      ]
+    }
+  },
+  "layers": [
+    {
+      "key": "sideStrands",
+      "src": "sideStrands.webp",
+      "x": 207,
+      "y": 235,
+      "w": 615,
+      "h": 438,
+      "z": 10,
+      "bind": {
+        "type": "hairFlow",
+        "roots": [
+          [
+            452.6,
+            270.1
+          ],
+          [
+            642.4,
+            262.8
+          ]
+        ],
+        "range": [
+          35,
+          330
+        ],
+        "mesh": {
+          "cw": 24,
+          "ch": 24,
+          "m": 18
+        }
+      },
+      "tint": "hair"
+    },
+    {
+      "key": "hairBack",
+      "src": "hairBack.webp",
+      "x": 400,
+      "y": 53,
+      "w": 277,
+      "h": 343,
+      "z": 20,
+      "bind": {
+        "type": "headLag",
+        "lag": 0.1,
+        "k": 1.4
+      },
+      "tint": "hair"
+    },
+    {
+      "key": "frontCenter",
+      "src": "frontCenter.webp",
+      "x": 523,
+      "y": 74,
+      "w": 218,
+      "h": 324,
+      "z": 190,
+      "bind": {
+        "type": "headSpring",
+        "spring": "s",
+        "yK": 0.5,
+        "rotK": 0.0062,
+        "pivotY": 110
+      },
+      "tint": "hair"
+    },
+    {
+      "key": "frontLeft",
+      "src": "frontLeft.webp",
+      "x": 358,
+      "y": 99,
+      "w": 168,
+      "h": 287,
+      "z": 191,
+      "bind": {
+        "type": "headSpring",
+        "spring": "s",
+        "yK": 0.5,
+        "rotK": 0.007,
+        "pivotY": 124
+      },
+      "tint": "hair"
+    },
+    {
+      "key": "frontRight",
+      "src": "frontRight.webp",
+      "x": 488,
+      "y": 80,
+      "w": 81,
+      "h": 203,
+      "z": 192,
+      "bind": {
+        "type": "headSpring",
+        "spring": "b",
+        "yK": 0.6,
+        "rotK": 0.012,
+        "pivotY": 102
+      },
+      "tint": "hair"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "base": "base/character-base/part.json",
+  "slots": {
+    "hair": {
+      "label": "헤어",
+      "en": "HAIR",
+      "default": "hair-001",
+      "parts": [
+        "hair/hair-001/part.json",
+        "hair/hair-002/part.json",
+        "hair/hair-003/part.json",
+        "hair/hair-004/part.json",
+        "hair/hair-005/part.json",
+        "hair/hair-007/part.json",
+        "hair/hair-008/part.json",
+        "hair/hair-012/part.json"
+      ]
+    },
+    "outfit": {
+      "label": "의상",
+      "en": "OUTFIT",
+      "default": "outfit-001",
+      "parts": [
+        "outfits/outfit-001/part.json"
+      ]
+    },
+    "eyes": {
+      "label": "눈",
+      "en": "EYES",
+      "default": "eyes-001",
+      "parts": [
+        "eyes/eyes-001/part.json",
+        "eyes/eyes-002/part.json",
+        "eyes/eyes-003/part.json",
+        "eyes/eyes-004/part.json",
+        "eyes/eyes-005/part.json"
+      ]
+    }
+  },
+  "upcoming": {
+    "hair": 0,
+    "outfit": 2,
+    "eyes": 0
+  }
+}
