@@ -1,0 +1,279 @@
+{
+  "id": "eyes-005",
+  "slot": "eyes",
+  "name": "내려간 눈",
+  "version": 1,
+  "thumb": {
+    "crop": [
+      452,
+      197,
+      186,
+      94
+    ]
+  },
+  "tint": {
+    "eye": {
+      "label": "눈 컬러",
+      "mode": "auto-eye",
+      "palette": [
+        {
+          "name": "기본",
+          "hsl": null,
+          "swatch": "#7aa6d0"
+        },
+        {
+          "name": "핑크",
+          "hsl": [
+            330,
+            0.7
+          ],
+          "swatch": "#f06fb0"
+        },
+        {
+          "name": "그린",
+          "hsl": [
+            140,
+            0.6
+          ],
+          "swatch": "#37c47a"
+        },
+        {
+          "name": "퍼플",
+          "hsl": [
+            280,
+            0.6
+          ],
+          "swatch": "#9a5cf0"
+        },
+        {
+          "name": "골드",
+          "hsl": [
+            45,
+            0.85
+          ],
+          "swatch": "#e8b020"
+        },
+        {
+          "name": "레드",
+          "hsl": [
+            355,
+            0.8
+          ],
+          "swatch": "#e0384a"
+        }
+      ]
+    }
+  },
+  "layers": [
+    {
+      "key": "scleraR",
+      "src": "scleraR.webp",
+      "x": 569,
+      "y": 235,
+      "w": 49,
+      "h": 39,
+      "z": 130,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "open",
+          "half"
+        ]
+      }
+    },
+    {
+      "key": "irisR",
+      "src": "irisR.webp",
+      "x": 573,
+      "y": 234,
+      "w": 34,
+      "h": 41,
+      "z": 131,
+      "bind": {
+        "type": "gaze"
+      },
+      "tint": "eye",
+      "clip": "scleraR"
+    },
+    {
+      "key": "lashLowR",
+      "src": "lashLowR.webp",
+      "x": 575,
+      "y": 269,
+      "w": 26,
+      "h": 11,
+      "z": 133,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "open"
+        ]
+      }
+    },
+    {
+      "key": "lidR",
+      "src": "lidR.webp",
+      "x": 561,
+      "y": 224,
+      "w": 68,
+      "h": 47,
+      "z": 134,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "open",
+          "half"
+        ]
+      }
+    },
+    {
+      "key": "lidHalfR",
+      "src": "lidHalfR.webp",
+      "x": 556,
+      "y": 223,
+      "w": 75,
+      "h": 48,
+      "z": 135,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "half"
+        ]
+      },
+      "tint": "eye"
+    },
+    {
+      "key": "lidClosedR",
+      "src": "lidClosedR.webp",
+      "x": 558,
+      "y": 223,
+      "w": 72,
+      "h": 57,
+      "z": 136,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "closed"
+        ]
+      },
+      "tint": "eye"
+    },
+    {
+      "key": "browR",
+      "src": "browR.webp",
+      "x": 559,
+      "y": 209,
+      "w": 62,
+      "h": 22,
+      "z": 137,
+      "bind": {
+        "type": "faceDetail"
+      }
+    },
+    {
+      "key": "scleraL",
+      "src": "scleraL.webp",
+      "x": 474,
+      "y": 235,
+      "w": 49,
+      "h": 39,
+      "z": 140,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "open",
+          "half"
+        ]
+      }
+    },
+    {
+      "key": "irisL",
+      "src": "irisL.webp",
+      "x": 485,
+      "y": 234,
+      "w": 34,
+      "h": 41,
+      "z": 141,
+      "bind": {
+        "type": "gaze"
+      },
+      "tint": "eye",
+      "clip": "scleraL"
+    },
+    {
+      "key": "lashLowL",
+      "src": "lashLowL.webp",
+      "x": 491,
+      "y": 269,
+      "w": 26,
+      "h": 11,
+      "z": 143,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "open"
+        ]
+      }
+    },
+    {
+      "key": "lidL",
+      "src": "lidL.webp",
+      "x": 463,
+      "y": 224,
+      "w": 68,
+      "h": 47,
+      "z": 144,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "open",
+          "half"
+        ]
+      }
+    },
+    {
+      "key": "lidHalfL",
+      "src": "lidHalfL.webp",
+      "x": 461,
+      "y": 223,
+      "w": 75,
+      "h": 48,
+      "z": 145,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "half"
+        ]
+      },
+      "tint": "eye"
+    },
+    {
+      "key": "lidClosedL",
+      "src": "lidClosedL.webp",
+      "x": 462,
+      "y": 223,
+      "w": 72,
+      "h": 57,
+      "z": 146,
+      "bind": {
+        "type": "blink",
+        "show": [
+          "closed"
+        ]
+      },
+      "tint": "eye"
+    },
+    {
+      "key": "browL",
+      "src": "browL.webp",
+      "x": 471,
+      "y": 209,
+      "w": 62,
+      "h": 22,
+      "z": 147,
+      "bind": {
+        "type": "faceDetail"
+      }
+    }
+  ]
+}

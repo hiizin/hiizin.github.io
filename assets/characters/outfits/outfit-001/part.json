@@ -1,0 +1,217 @@
+{
+  "id": "outfit-001",
+  "slot": "outfit",
+  "name": "민트 크롭 & 벌룬 스커트",
+  "version": 2,
+  "thumb": {
+    "crop": [
+      277,
+      328,
+      540,
+      730
+    ]
+  },
+  "tint": {
+    "top": {
+      "label": "상의 컬러",
+      "mode": "auto-cloth",
+      "palette": [
+        {
+          "name": "기본",
+          "hsl": null,
+          "swatch": "#e8f7f6"
+        },
+        {
+          "name": "화이트",
+          "hsl": [
+            0,
+            0,
+            0.03
+          ],
+          "swatch": "#ffffff"
+        },
+        {
+          "name": "핑크",
+          "hsl": [
+            335,
+            0.8,
+            -0.12
+          ],
+          "swatch": "#f4a3c7"
+        },
+        {
+          "name": "블루",
+          "hsl": [
+            215,
+            0.8,
+            -0.17
+          ],
+          "swatch": "#6fa8f0"
+        },
+        {
+          "name": "민트",
+          "hsl": [
+            160,
+            0.55,
+            -0.1
+          ],
+          "swatch": "#7fdcc0"
+        },
+        {
+          "name": "옐로",
+          "hsl": [
+            48,
+            0.9,
+            -0.12
+          ],
+          "swatch": "#f5d76e"
+        },
+        {
+          "name": "블랙",
+          "hsl": [
+            240,
+            0.1,
+            -0.78
+          ],
+          "swatch": "#2a2c36"
+        }
+      ]
+    },
+    "skirt": {
+      "label": "스커트 컬러",
+      "mode": "auto-cloth",
+      "palette": [
+        {
+          "name": "기본",
+          "hsl": null,
+          "swatch": "#e8f7f6"
+        },
+        {
+          "name": "화이트",
+          "hsl": [
+            0,
+            0,
+            0.03
+          ],
+          "swatch": "#ffffff"
+        },
+        {
+          "name": "핑크",
+          "hsl": [
+            335,
+            0.8,
+            -0.12
+          ],
+          "swatch": "#f4a3c7"
+        },
+        {
+          "name": "블루",
+          "hsl": [
+            215,
+            0.8,
+            -0.17
+          ],
+          "swatch": "#6fa8f0"
+        },
+        {
+          "name": "민트",
+          "hsl": [
+            160,
+            0.55,
+            -0.1
+          ],
+          "swatch": "#7fdcc0"
+        },
+        {
+          "name": "옐로",
+          "hsl": [
+            48,
+            0.9,
+            -0.12
+          ],
+          "swatch": "#f5d76e"
+        },
+        {
+          "name": "블랙",
+          "hsl": [
+            240,
+            0.1,
+            -0.78
+          ],
+          "swatch": "#2a2c36"
+        }
+      ]
+    }
+  },
+  "layers": [
+    {
+      "key": "skirt",
+      "src": "skirt.webp",
+      "x": 302,
+      "y": 735,
+      "w": 489,
+      "h": 319,
+      "z": 80,
+      "bind": {
+        "type": "static"
+      },
+      "tint": "skirt"
+    },
+    {
+      "key": "sleeveR",
+      "src": "sleeveR.webp",
+      "x": 332,
+      "y": 389,
+      "w": 161,
+      "h": 190,
+      "z": 86,
+      "bind": {
+        "type": "armBone",
+        "side": "R",
+        "bone": "sleeve"
+      },
+      "tint": "top"
+    },
+    {
+      "key": "sleeveL",
+      "src": "sleeveL.webp",
+      "x": 599,
+      "y": 389,
+      "w": 161,
+      "h": 190,
+      "z": 87,
+      "bind": {
+        "type": "armBone",
+        "side": "L",
+        "bone": "sleeve"
+      },
+      "tint": "top"
+    },
+    {
+      "key": "top",
+      "src": "top.webp",
+      "x": 423,
+      "y": 347,
+      "w": 244,
+      "h": 339,
+      "z": 90,
+      "bind": {
+        "type": "torso"
+      },
+      "tint": "top"
+    },
+    {
+      "key": "skirtFront",
+      "src": "skirtFront.webp",
+      "x": 302,
+      "y": 735,
+      "w": 489,
+      "h": 319,
+      "z": 99,
+      "bind": {
+        "type": "static"
+      },
+      "tint": "skirt"
+    }
+  ]
+}
